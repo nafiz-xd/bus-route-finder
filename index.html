@@ -109,9 +109,24 @@ main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
 #searchEmpty .empty-img img{width:min(78%,300px);display:block;margin:0 auto}
 #searchEmpty h3{font-size:19px;margin-top:14px}
 #searchEmpty p{color:var(--muted);font-size:14px;line-height:1.55;margin-top:5px}
+.fields-wrap .field + .field{margin-top:30px}
+.search-row{display:flex;gap:10px;align-items:stretch}
+.search-row #searchBtn{flex:1;width:auto}
+#resetBtn{border:2px solid var(--border);background:var(--surface2);color:var(--text);border-radius:15px;padding:0 20px;font-size:15.5px;font-weight:800;cursor:pointer;transition:transform .15s,border-color .2s}
+#resetBtn:active{transform:scale(.95)}
+#stickyBar{position:sticky;top:62px;z-index:800;background:color-mix(in srgb,var(--surface) 93%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:16px;padding:10px 12px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
+.sb-row1{display:flex;align-items:center;gap:8px}
+#sbRoute{font-weight:800;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sbEdit{border:1.5px solid var(--border);background:var(--surface2);color:var(--green);border-radius:99px;padding:5px 12px;font-weight:800;font-size:13px;cursor:pointer;flex:none}
+.sb-row2{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
+.seg.sm button{padding:6px 11px;font-size:12.5px}
+.switch.sm{width:40px;height:23px}
+.switch.sm .track::after{width:17px;height:17px}
+.switch.sm input:checked + .track::after{transform:translateX(17px)}
+.sb-student{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
 .swap-row{display:flex;justify-content:center;padding:1px 6px}
 #swapBtn{width:40px;height:40px;border-radius:50%;border:2px solid var(--green);background:var(--surface);color:var(--green);font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .5s cubic-bezier(.55,-0.3,.3,1.35),background .3s;box-shadow:var(--shadow-sm)}
-#swapBtn{position:absolute;left:50%;top:120px;margin:-22px 0 0 -22px;z-index:6}
+#swapBtn{position:absolute;left:50%;top:120px;margin:-22px 0 0 -22px;z-index:6;box-shadow:0 5px 16px rgba(0,0,0,.22)}
 #swapBtn.flipped{transform:rotate(180deg)}
 #swapBtn:active{scale:.92}
 .toggle-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:14px 2px 16px}
@@ -470,7 +485,10 @@ footer b{color:var(--text)}
         </div>
       </div>
 
-      <button id="searchBtn" type="button"><span class="spinner"></span><span id="searchBtnText" data-i18n="search">Search routes</span></button>
+      <div class="search-row">
+        <button id="resetBtn" type="button" data-i18n="resetBtn">Reset</button>
+        <button id="searchBtn" type="button"><span class="spinner"></span><span id="searchBtnText" data-i18n="search">Search routes</span></button>
+      </div>
       <div id="searchError" role="alert"></div>
     </div>
 
@@ -499,6 +517,24 @@ footer b{color:var(--text)}
 
     <!-- results -->
     <section id="resultsSection">
+      <div id="stickyBar">
+        <div class="sb-row1"><span id="sbRoute"></span><button id="sbEdit" type="button">✎ <span data-i18n="editBtn">Edit</span></button></div>
+        <div class="sb-row2">
+          <div class="seg sm" role="group" aria-label="Bus type">
+            <button type="button" id="sbAcAll" class="active" data-i18n="acAll">All</button>
+            <button type="button" id="sbAcAC" data-i18n="acOnly">AC</button>
+            <button type="button" id="sbAcNon" data-i18n="nonAcOnly">Non-AC</button>
+          </div>
+          <div class="seg sm" role="group" aria-label="Traffic">
+            <button type="button" id="sbOff" class="active" data-i18n="offpeak">Off-peak</button>
+            <button type="button" id="sbPeak" data-i18n="peak">Peak</button>
+          </div>
+          <label class="sb-student">
+            <span class="switch sm"><input type="checkbox" id="sbStudent"><span class="track"></span></span>
+            <span data-i18n="student">Student half fare</span>
+          </label>
+        </div>
+      </div>
       <div id="resultsMeta"></div>
       <div id="resultsList"></div>
     </section>
@@ -585,6 +621,8 @@ footer b{color:var(--text)}
         <textarea id="reportDetails" data-i18n-ph="reportDetailsPh" placeholder="Tell us what is wrong or missing…"></textarea>
         <label for="reportName" data-i18n="reportName">Your name (optional)</label>
         <input type="text" id="reportName" data-i18n-ph="reportNamePh" placeholder="e.g. Rahim">
+        <label for="reportContact" data-i18n="reportContact">Email or mobile (optional)</label>
+        <input type="text" id="reportContact" data-i18n-ph="reportContactPh" placeholder="e.g. you@mail.com or 01XXXXXXXXX">
         <button id="reportSubmit" type="submit" data-i18n="reportSubmit">Submit report</button>
       </form>
       <div id="reportMsg"></div>
@@ -646,6 +684,7 @@ const STRINGS = {
     liveBtn: 'Live trip', liveNext: 'Next stop', liveLeft: 'stops left', liveAway: 'away', liveArrived: 'You have arrived at your destination!', liveChange: 'Change here — take', liveGpsWait: 'Waiting for GPS… keep this page open while you travel.', liveTracking: 'GPS tracking is on — stops will be ticked off as you pass them.', liveManual: 'GPS is off or unavailable — tap a stop when you reach it to tick it off.', liveEnd: 'End trip', allStops: 'All stoppages',
     tapStopsHint: 'Tap the stop you will board at, then the stop where you will get down.', boardTag: 'Board', alightTag: 'Get down', startTripBtn: 'Start live trip', recenterMe: 'Back to my location',
     searchEmptyTitle: 'Search', searchEmptyText: 'Choose your From and To stops, then tap Search routes — best buses, fares and live trips, all in one place.',
+    resetBtn: 'Reset', editBtn: 'Edit', reportContact: 'Email or mobile (optional)', reportContactPh: 'e.g. you@mail.com or 01XXXXXXXXX',
     interchange: 'Bus interchange',
     reportTitle: 'Report & Suggest', reportSub: 'Help keep the data right', reportType: 'Report type',
     rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
@@ -661,7 +700,7 @@ const STRINGS = {
     mapBtn: '🗺 Map', saveBtn: '☆ Save', savedBtn: '★ Saved', shareBtn: '↗ Share',
     totalFare: 'Total fare', mapTitle: 'Route map', routeMap: 'Route map',
     resultsWord: 'route options', noRoute: 'No route found between these two stops yet. Try a nearby stop, or report the missing connection below.',
-    errEmpty: 'Please enter both a From and a To place.', errSame: 'From and To are the same place — pick two different stops.',
+    errEmpty: 'Please enter both a From and a To stop.', errSame: 'From and To are the same place — pick two different stops.',
     firstBus: 'First', lastBus: 'Last', every: 'Every', busesVia: 'buses pass this stop', noBusVia: 'No bus found for this stop yet.',
     reportThanks: 'Thanks! Your report was saved on this device.', reportEmpty: 'Please write a few details first.',
     copied: 'Copied to clipboard', sharedOk: 'Shared — thank you!', nearestSet: 'Nearest stop set: ',
@@ -676,8 +715,8 @@ const STRINGS = {
   bn: {
     appName: 'ঢাকা বাস রুট ফাইন্ডার', tagline: 'বাস, ট্রান্সফার ও মেট্রো রুট — ভাড়াসহ', install: 'ইনস্টল',
     heroTitleA: 'আজ কোথায়', heroTitleB: 'যেতে চান?',
-    heroSub: 'সরাসরি বাস, স্মার্ট একবার-বদলি যাত্রা আর মেট্রো রেল কম্বো — ভাড়া ও সময়সহ।',
-    statBuses: 'বাস সার্ভিস', statStops: 'স্টপ কভারেজ', statMetro: 'মেট্রো স্টেশন',
+    heroSub: 'সরাসরি বাস, একবার বদলিসহ সহজ যাত্রা আর মেট্রো রেল কম্বো — ভাড়া ও যাত্রার সময়সহ।',
+    statBuses: 'বাস সার্ভিস', statStops: 'মোট স্টপ', statMetro: 'মেট্রো স্টেশন',
     fromLabel: 'যাত্রা শুরু', toLabel: 'গন্তব্য', fromPh: 'কোথা থেকে যাত্রা শুরু?', toPh: 'কোথায় যেতে চান?',
     nearMe: 'আমার কাছে', locating: 'খোঁজা হচ্ছে…', student: 'ছাত্র অর্ধেক ভাড়া', peak: 'ভিড়ের সময়', offpeak: 'স্বাভাবিক সময়',
     search: 'রুট খুঁজুন', popular: 'জনপ্রিয় রুট', favorites: 'পছন্দের রুট', recent: 'সাম্প্রতিক অনুসন্ধান',
@@ -687,10 +726,11 @@ const STRINGS = {
     pickStopPh: 'স্টপের নাম লিখতে শুরু করুন…', stopBoardHint: 'উপরে একটি স্টপ বাছুন — ওখানে কোন কোন বাস থামে আর কোথায় যায় দেখুন।',
     metroTitle: 'মেট্রো রেল — MRT-6', metroSub: 'উত্তরা উত্তর ↔ কমলাপুর',
     metroNote: 'টিপস: সার্চ রেজাল্টে বাসের সাথে মেট্রো মিলিয়ে যাত্রা সাজানো হয় — ইন্টারচেঞ্জ স্টেশনে নেমে মেট্রোতে উঠলে যানজট এড়ানো যায়। কোন বাস পাবেন দেখতে নিচে "বাস ইন্টারচেঞ্জ" স্টেশনে ট্যাপ করুন।',
-    gmapsBtn: 'Google Maps-এ খুলুন (লাইভ ট্রাফিক)', busesFromHere: 'এখান থেকে যেসব বাস ধরতে পারবেন', setFromBtn: 'From হিসেবে নিন', fromSet: 'From সেট হয়েছে: ',
-    liveBtn: 'লাইভ যাত্রা', liveNext: 'পরের স্টপ', liveLeft: 'টা স্টপ বাকি', liveAway: 'দূরে', liveArrived: 'আপনি গন্তব্যে পৌঁছে গেছেন!', liveChange: 'এখানে বদলান — ধরুন', liveGpsWait: 'GPS-এর জন্য অপেক্ষা করা হচ্ছে… যাত্রার সময় পেজটা খোলা রাখুন।', liveTracking: 'GPS tracking চলছে — stop পেরোলেই ✓ হয়ে যাবে।', liveManual: 'GPS off বা পাওয়া যাচ্ছে না — কোনো স্টপে পৌঁছালে সেটায় tap করে ✓ দিন।', liveEnd: 'যাত্রা শেষ', allStops: 'সব স্টপেজ',
-    tapStopsHint: 'যে স্টপ থেকে উঠবেন সেটায় tap করুন, তারপর যেখানে নামবেন সেটায় tap করুন।', boardTag: 'উঠবো', alightTag: 'নামবো', startTripBtn: 'লাইভ যাত্রা শুরু করুন', recenterMe: 'আমার অবস্থানে ফিরুন',
-    searchEmptyTitle: 'খুঁজুন', searchEmptyText: 'From আর To stop বেছে Search routes-এ tap করুন — সেরা bus, ভাড়া আর live trip, সব এক জায়গায়।',
+    gmapsBtn: 'Google Maps-এ খুলুন (লাইভ ট্রাফিক)', busesFromHere: 'এখান থেকে যেসব বাস ধরতে পারবেন', setFromBtn: 'যাত্রা শুরু হিসেবে নিন', fromSet: 'যাত্রা শুরু সেট হয়েছে: ',
+    liveBtn: 'লাইভ যাত্রা', liveNext: 'পরের স্টপ', liveLeft: 'টা স্টপ বাকি', liveAway: 'দূরে', liveArrived: 'আপনি গন্তব্যে পৌঁছে গেছেন!', liveChange: 'এখানে বদলান — ধরুন', liveGpsWait: 'জিপিএস-এর জন্য অপেক্ষা করা হচ্ছে… যাত্রার সময় পেজটা খোলা রাখুন।', liveTracking: 'জিপিএস ট্র্যাকিং চলছে — স্টপ পেরোলেই ✓ চিহ্ন পড়ে যাবে।', liveManual: 'জিপিএস বন্ধ বা পাওয়া যাচ্ছে না — কোনো স্টপে পৌঁছালে সেটায় ট্যাপ করে ✓ দিন।', liveEnd: 'যাত্রা শেষ', allStops: 'সব স্টপেজ',
+    tapStopsHint: 'যে স্টপ থেকে উঠবেন সেটায় ট্যাপ করুন, তারপর যেখানে নামবেন সেটায় ট্যাপ করুন।', boardTag: 'উঠবো', alightTag: 'নামবো', startTripBtn: 'লাইভ যাত্রা শুরু করুন', recenterMe: 'আমার অবস্থানে ফিরুন',
+    searchEmptyTitle: 'খুঁজুন', searchEmptyText: 'যাত্রা শুরু আর গন্তব্যের স্টপ বেছে "রুট খুঁজুন" চাপুন — সেরা বাস, ভাড়া আর লাইভ যাত্রা, সব এক জায়গায়।',
+    resetBtn: 'রিসেট', editBtn: 'বদলান', reportContact: 'ইমেইল বা মোবাইল নম্বর (ঐচ্ছিক)', reportContactPh: 'যেমন: you@mail.com বা 01XXXXXXXXX',
     interchange: 'বাস ইন্টারচেঞ্জ',
     reportTitle: 'রিপোর্ট ও পরামর্শ', reportSub: 'তথ্য ঠিক রাখতে সাহায্য করুন', reportType: 'রিপোর্টের ধরন',
     rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
@@ -706,12 +746,12 @@ const STRINGS = {
     mapBtn: '🗺 ম্যাপ', saveBtn: '☆ সেভ', savedBtn: '★ সেভ হয়েছে', shareBtn: '↗ শেয়ার',
     totalFare: 'মোট ভাড়া', mapTitle: 'রুটের ম্যাপ', routeMap: 'রুটের ম্যাপ',
     resultsWord: 'রুট অপশন', noRoute: 'এই দুই স্টপের মধ্যে এখনো কোনো রুট পাওয়া যায়নি। কাছের অন্য স্টপ চেষ্টা করুন, অথবা নিচে রিপোর্ট করে জানান।',
-    errEmpty: 'From আর To — দুটো জায়গাই লিখুন।', errSame: 'From আর To একই জায়গা — দুটি আলাদা স্টপ বাছুন।',
+    errEmpty: 'যাত্রা শুরু আর গন্তব্য — দুটো জায়গাই লিখুন।', errSame: 'যাত্রা শুরু আর গন্তব্য একই জায়গা — দুটি আলাদা স্টপ বাছুন।',
     firstBus: 'প্রথম', lastBus: 'শেষ', every: 'প্রতি', busesVia: 'টি বাস এই স্টপ দিয়ে যায়', noBusVia: 'এই স্টপের জন্য এখনো কোনো বাস পাওয়া যায়নি।',
     reportThanks: 'ধন্যবাদ! আপনার রিপোর্ট এই ডিভাইসে সেভ হয়েছে।', reportEmpty: 'আগে কিছু বিস্তারিত লিখুন।',
     copied: 'ক্লিপবোর্ডে কপি হয়েছে', sharedOk: 'শেয়ার হয়েছে — ধন্যবাদ!', nearestSet: 'সবচেয়ে কাছের স্টপ সেট হয়েছে: ',
     geoErr: 'GPS লোকেশন পাওয়া যাচ্ছে না। আবার চেষ্টা করুন, অথবা স্টপের নাম লিখে দিন।', geoNA: 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।',
-    geoDenied: 'লোকেশনের permission বন্ধ আছে। Facebook বা Telegram-এর ভিতরে খুলে থাকলে Safari-তে সাইটটা খুলুন, আর location চাইলে Allow দিন।',
+    geoDenied: 'লোকেশনের অনুমতি বন্ধ আছে। Facebook বা Telegram-এর ভিতরে খুলে থাকলে Safari-তে সাইটটা খুলুন, আর লোকেশন চাইলে Allow করুন।',
     busType: 'বাসের ধরন', acAll: 'সব', acOnly: 'এসি', nonAcOnly: 'নন-এসি',
     noAcRoute: 'এই রুটে এখনো কোনো এসি বাস নেই। সব অপশন দেখতে বাসের ধরন "সব" করুন।', noNonAcRoute: 'এই রুটের সব অপশনেই এসি বাস বা মেট্রো লাগছে। দেখতে বাসের ধরন "সব" করুন।',
     mapFail: 'ম্যাপ লোড করা যায়নি (ইন্টারনেট লাগে)। উপরের যাত্রার বিবরণ ঠিকঠাক আছে।',
@@ -990,6 +1030,14 @@ function syncToggles() {
   $('segAcAll').classList.toggle('active', acFilter === 'all');
   $('segAcAC').classList.toggle('active', acFilter === 'ac');
   $('segAcNon').classList.toggle('active', acFilter === 'nonac');
+  if ($('sbStudent')) {
+    $('sbStudent').checked = student;
+    $('sbPeak').classList.toggle('active', peak);
+    $('sbOff').classList.toggle('active', !peak);
+    $('sbAcAll').classList.toggle('active', acFilter === 'all');
+    $('sbAcAC').classList.toggle('active', acFilter === 'ac');
+    $('sbAcNon').classList.toggle('active', acFilter === 'nonac');
+  }
 }
 $('studentToggle').addEventListener('change', e => { student = e.target.checked; store.set('student', student); if (lastFrom) renderLast(false); });
 $('segPeak').addEventListener('click', () => { peak = true; store.set('peak', true); syncToggles(); if (lastFrom) renderLast(false); });
@@ -998,6 +1046,26 @@ function setAcFilter(v) { acFilter = v; store.set('acFilter', v); syncToggles();
 $('segAcAll').addEventListener('click', () => setAcFilter('all'));
 $('segAcAC').addEventListener('click', () => setAcFilter('ac'));
 $('segAcNon').addEventListener('click', () => setAcFilter('nonac'));
+$('sbAcAll').addEventListener('click', () => setAcFilter('all'));
+$('sbAcAC').addEventListener('click', () => setAcFilter('ac'));
+$('sbAcNon').addEventListener('click', () => setAcFilter('nonac'));
+$('sbPeak').addEventListener('click', () => { peak = true; store.set('peak', true); syncToggles(); if (lastFrom) renderLast(false); });
+$('sbOff').addEventListener('click', () => { peak = false; store.set('peak', false); syncToggles(); if (lastFrom) renderLast(false); });
+$('sbStudent').addEventListener('change', e => { student = e.target.checked; store.set('student', student); syncToggles(); if (lastFrom) renderLast(false); });
+$('sbEdit').addEventListener('click', () => {
+  document.querySelector('.search-card').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
+});
+$('resetBtn').addEventListener('click', () => {
+  $('fromInput').value = '';
+  $('toInput').value = '';
+  hideError();
+  if (typeof live !== 'undefined' && live) stopLive(false);
+  $('mapPanel').classList.remove('show');
+  $('resultsSection').classList.remove('show');
+  lastFrom = null; lastTo = null; lastJourneys = [];
+  const se = $('searchEmpty'); if (se) se.style.display = '';
+  document.querySelector('.search-card').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
+});
 syncToggles();
 
 $('nearBtn').addEventListener('click', () => {
@@ -1139,6 +1207,7 @@ function journeyHTML(jn, idx) {
 function renderResults() {
   const s = S();
   const sec = $('resultsSection'); sec.classList.add('show');
+  $('sbRoute').textContent = stopName(lastFrom) + ' → ' + stopName(lastTo);
   $('resultsMeta').innerHTML = esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo)) +
     '<span class="muted">' + fmtN(lastJourneys.length) + ' ' + esc(s.resultsWord) + ' · ' + esc(peak ? s.peak : s.offpeak) + (student ? ' · ' + esc(s.student) : '') + '</span>';
   if (!lastJourneys.length) {
@@ -1528,6 +1597,7 @@ function renderReports() {
   $('reportList').innerHTML = reps.map(r =>
     '<div class="rep-item"><b>' + esc(s.repTypeNames[r.type] || r.type) + '</b> — ' + esc(r.details) +
     (r.name ? '<small>— ' + esc(r.name) + '</small>' : '') +
+    (r.contact ? '<small>✉ ' + esc(r.contact) + '</small>' : '') +
     '<small>' + esc(fmtN(new Date(r.ts).toLocaleString())) + '</small></div>').join('');
 }
 $('reportForm').addEventListener('submit', e => {
@@ -1535,7 +1605,7 @@ $('reportForm').addEventListener('submit', e => {
   const s = S();
   const details = $('reportDetails').value.trim();
   if (!details) { toast(s.reportEmpty); $('reportDetails').focus(); return; }
-  const rep = { type: $('reportType').value, details: details, name: $('reportName').value.trim(), ts: Date.now() };
+  const rep = { type: $('reportType').value, details: details, name: $('reportName').value.trim(), contact: $('reportContact').value.trim(), ts: Date.now() };
   const reps = store.get('reports', []);
   reps.unshift(rep);
   store.set('reports', reps.slice(0, 20));
@@ -1545,6 +1615,7 @@ $('reportForm').addEventListener('submit', e => {
   msg.classList.add('show');
   $('shareReportBtn').addEventListener('click', () => shareText(s.shareTextIntro + ' — ' + (s.repTypeNames[rep.type] || rep.type) + ': ' + rep.details));
   $('reportDetails').value = '';
+  $('reportContact').value = '';
 });
 
 /* ---------- language ---------- */
