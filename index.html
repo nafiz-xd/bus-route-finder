@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhaka Bus Route Finder — Find Your Bus</title>
+<meta name="description" content="Find which Dhaka city buses go from one place to another, with stop lists, direction and estimated fares.">
+<style>
+  :root{
+    --green:#0e7a3d; --green-dark:#0a5c2e; --green-light:#e6f4ec;
+    --ink:#1c2530; --muted:#5b6b7a; --bg:#f4f7f5; --card:#ffffff;
+    --border:#dce5df; --amber:#f5a623; --radius:14px;
+    --shadow:0 4px 18px rgba(14,90,46,.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55;}
+  header{background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%); color:#fff; padding:34px 18px 30px; text-align:center;}
+  header .bus-icon{font-size:2.6rem; line-height:1;}
+  header h1{font-size:clamp(1.5rem,4.5vw,2.3rem); margin:8px 0 6px; letter-spacing:.3px;}
+  header p{opacity:.92; font-size:.98rem; max-width:560px; margin:0 auto;}
+  main{max-width:960px; margin:0 auto; padding:22px 16px 48px;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:22px;}
+  .card h2{font-size:1.15rem; color:var(--green-dark); margin-bottom:14px;}
+  .search-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:end;}
+  .field label{display:block; font-size:.82rem; font-weight:600; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px;}
+  .field input{width:100%; padding:12px 13px; border:1.5px solid var(--border); border-radius:10px; font-size:1rem; background:#fbfdfc; color:var(--ink);}
+  .field input:focus{outline:none; border-color:var(--green); background:#fff;}
+  #swapBtn{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--border); background:var(--green-light); color:var(--green-dark); font-size:1.15rem; cursor:pointer; margin-bottom:2px;}
+  #swapBtn:hover{background:var(--green); color:#fff;}
+  #searchBtn{width:100%; margin-top:14px; padding:13px; background:var(--green); color:#fff; border:none; border-radius:10px; font-size:1.02rem; font-weight:700; cursor:pointer;}
+  #searchBtn:hover{background:var(--green-dark);}
+  .hint{font-size:.85rem; color:var(--muted); margin-top:9px;}
+  .result{border:1px solid var(--border); border-left:5px solid var(--green); border-radius:10px; padding:14px 16px; margin-bottom:12px; background:#fbfdfc;}
+  .result-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px; align-items:baseline;}
+  .result-head .bus-name{font-weight:700; font-size:1.06rem; color:var(--green-dark);}
+  .badge{background:var(--green-light); color:var(--green-dark); font-size:.78rem; font-weight:700; padding:3px 9px; border-radius:20px;}
+  .badge.fare{background:#fdf1d7; color:#8a5c00;}
+  .direction{font-size:.9rem; color:var(--muted); margin:4px 0 9px;}
+  .segment{display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:.88rem;}
+  .segment .stop{background:#eef3f0; border:1px solid var(--border); padding:2px 8px; border-radius:14px;}
+  .segment .stop.end{background:var(--green); color:#fff; border-color:var(--green); font-weight:600;}
+  .segment .arrow{color:var(--green); font-weight:700;}
+  .no-result{background:#fdf1d7; border:1px solid #f0d9a0; border-radius:10px; padding:14px 16px; font-size:.94rem;}
+  .filter-row input{width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:10px; font-size:.98rem; background:#fbfdfc;}
+  .filter-row input:focus{outline:none; border-color:var(--green); background:#fff;}
+  .bus-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:14px;}
+  .bus-chip{border:1.5px solid var(--border); background:#fbfdfc; border-radius:10px; padding:11px 13px; cursor:pointer; text-align:left; font-size:.95rem;}
+  .bus-chip:hover{border-color:var(--green);}
+  .bus-chip.active{border-color:var(--green); background:var(--green-light);}
+  .bus-chip .bname{font-weight:700; color:var(--green-dark); display:block;}
+  .bus-chip .bmeta{font-size:.8rem; color:var(--muted);}
+  #routeDetail{margin-top:18px; display:none;}
+  #routeDetail h3{color:var(--green-dark); font-size:1.05rem; margin-bottom:4px;}
+  #routeDetail .ends{font-size:.88rem; color:var(--muted); margin-bottom:14px;}
+  .timeline{list-style:none; position:relative; padding-left:26px;}
+  .timeline::before{content:''; position:absolute; left:8px; top:8px; bottom:8px; width:3px; background:var(--green); border-radius:2px; opacity:.35;}
+  .timeline li{position:relative; padding:5px 0; font-size:.95rem;}
+  .timeline li::before{content:''; position:absolute; left:-24px; top:11px; width:11px; height:11px; border-radius:50%; background:#fff; border:3px solid var(--green);}
+  .timeline li.first::before,.timeline li.last::before{background:var(--green);}
+  .timeline li .tlabel{font-size:.72rem; font-weight:700; color:var(--amber); text-transform:uppercase; letter-spacing:.5px; margin-left:6px;}
+  footer{text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 30px;}
+  @media (max-width:560px){
+    .search-grid{grid-template-columns:1fr;}
+    #swapBtn{margin:0 auto; transform:rotate(90deg);}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bus-icon">🚌</div>
+  <h1>Dhaka Bus Route Finder</h1>
+  <p>Type where you are and where you want to go — get every city bus that connects them, with direction, stops and an estimated fare.</p>
+</header>
+
+<main>
+  <!-- ============ SEARCH ============ -->
+  <section class="card">
+    <h2>🔍 Find a Bus</h2>
+    <div class="search-grid">
+      <div class="field">
+        <label for="fromInput">From</label>
+        <input id="fromInput" list="stopList" placeholder="e.g. Mirpur 10" autocomplete="off">
+      </div>
+      <button id="swapBtn" title="Swap From / To" aria-label="Swap From and To">⇄</button>
+      <div class="field">
+        <label for="toInput">To</label>
+        <input id="toInput" list="stopList" placeholder="e.g. Motijheel" autocomplete="off">
+      </div>
+    </div>
+    <datalist id="stopList"></datalist>
+    <button id="searchBtn">Search Buses</button>
+    <p class="hint">Start typing a place name and pick from the suggestions. Fare is an estimate based on distance.</p>
+    <div id="results" style="margin-top:16px;"></div>
+  </section>
+
+  <!-- ============ ALL BUSES ============ -->
+  <section class="card">
+    <h2>🗂️ All Bus Routes</h2>
+    <div class="filter-row">
+      <input id="busFilter" type="text" placeholder="Filter buses by name… e.g. Raida" autocomplete="off">
+    </div>
+    <div class="bus-grid" id="busGrid"></div>
+    <div id="routeDetail">
+      <h3 id="routeTitle"></h3>
+      <p class="ends" id="routeEnds"></p>
+      <ul class="timeline" id="routeTimeline"></ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Dhaka Bus Route Finder · Routes and fares are approximate — please confirm with the conductor. Made by Nafiz Bin Azad.
+</footer>
+
+<script>
+/* ================= DATA: Dhaka local bus services ================= */
+const BUSES = [
+  { name:"Raida", stops:["Abdullahpur","Uttara","Airport","Khilkhet","Kuril Bishwa Road","Notun Bazar","Badda","Rampura","Malibagh","Moghbazar","Kakrail","Paltan","Gulistan","Motijheel"] },
+  { name:"Victor Paribahan", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Agargaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Paltan","Gulistan","Motijheel"] },
+  { name:"Akash", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari"] },
+  { name:"Shadhin", stops:["Shyamoli","Mohammadpur","Dhanmondi","Science Lab","Elephant Road","Shahbagh","Press Club","Paltan","Gulistan","Motijheel"] },
+  { name:"Midline", stops:["Gabtoli","Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Tejgaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Gulistan","Motijheel"] },
+  { name:"Trans Silva", stops:["Mirpur 1","Gabtoli","Technical","Kalyanpur","Shyamoli","Mohammadpur","Dhanmondi","Science Lab","New Market","Azimpur"] },
+  { name:"Labbaik", stops:["Tongi","Abdullahpur","Uttara","Airport","Kuril Bishwa Road","Banani","Mohakhali","Agargaon","Shewrapara","Kazipara","Mirpur 10","Mirpur 1","Gabtoli"] },
+  { name:"Mirpur Metro", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari"] },
+  { name:"BRTC", stops:["Abdullahpur","Uttara","Airport","Banani","Mohakhali","Tejgaon","Farmgate","Shahbagh","Press Club","Gulistan","Motijheel"] },
+  { name:"Asmani", stops:["Azimpur","New Market","Science Lab","Dhanmondi","Mohammadpur","Shyamoli","Kalyanpur","Technical","Gabtoli","Mirpur 1","Mirpur 10","Pallabi"] },
+  { name:"Ramjan", stops:["Mohammadpur","Shyamoli","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Badda","Rampura","Malibagh","Khilgaon","Basabo","Sayedabad"] },
+  { name:"Turag", stops:["Tongi","Abdullahpur","Uttara","Airport","Banani","Mohakhali","Tejgaon","Farmgate","Shahbagh","Science Lab","New Market","Azimpur"] },
+  { name:"Projapoti", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Agargaon","Farmgate","Karwan Bazar","Moghbazar","Malibagh","Khilgaon","Basabo","Sayedabad","Jatrabari"] },
+  { name:"Alif", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Badda","Rampura"] },
+  { name:"Bhuiyan", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Mohammadpur","Dhanmondi","Science Lab","Shahbagh","Press Club","Paltan","Gulistan","Sayedabad","Jatrabari"] },
+  { name:"Safa Marwa", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari","Sign Board"] }
+];
+
+/* ================= helpers ================= */
+const $ = id => document.getElementById(id);
+const allStops = [...new Set(BUSES.flatMap(b => b.stops))].sort();
+$('stopList').innerHTML = allStops.map(s => `<option value="${s}">`).join('');
+
+function matchStop(text){
+  if(!text) return null;
+  const t = text.trim().toLowerCase();
+  return allStops.find(s => s.toLowerCase() === t) || null;
+}
+function estimateFare(segments){
+  const distanceKm = segments * 1.1;
+  const fare = Math.max(10, Math.round(distanceKm * 2.45));
+  return { distanceKm: distanceKm.toFixed(1), fare };
+}
+
+/* ================= search ================= */
+function doSearch(){
+  const fromRaw = $('fromInput').value, toRaw = $('toInput').value;
+  const from = matchStop(fromRaw), to = matchStop(toRaw);
+  const box = $('results');
+  if(!from || !to){
+    box.innerHTML = `<div class="no-result">⚠️ Please pick both a <strong>From</strong> and a <strong>To</strong> place from the suggestion list.</div>`;
+    return;
+  }
+  if(from === to){
+    box.innerHTML = `<div class="no-result">⚠️ From and To are the same place — pick two different stops.</div>`;
+    return;
+  }
+  const found = [];
+  BUSES.forEach(bus => {
+    const i = bus.stops.indexOf(from), j = bus.stops.indexOf(to);
+    if(i === -1 || j === -1) return;
+    const segments = Math.abs(j - i);
+    const slice = bus.stops.slice(Math.min(i,j), Math.max(i,j) + 1);
+    const segment = i < j ? slice : slice.reverse();
+    const towards = i < j ? bus.stops[bus.stops.length - 1] : bus.stops[0];
+    found.push({ bus, segments, segment, towards });
+  });
+  found.sort((a,b) => a.segments - b.segments);
+
+  if(found.length === 0){
+    box.innerHTML = `<div class="no-result">😕 No direct bus found from <strong>${from}</strong> to <strong>${to}</strong>. Try travelling to a common hub such as Farmgate, Gulistan, Motijheel or Mirpur 10 and changing buses there.</div>`;
+    return;
+  }
+  box.innerHTML = `<p style="margin-bottom:12px;"><strong>${found.length}</strong> direct bus${found.length>1?'es':''} from <strong>${from}</strong> to <strong>${to}</strong>:</p>` +
+    found.map(f => {
+      const { distanceKm, fare } = estimateFare(f.segments);
+      const segHtml = f.segment.map((s,idx) =>
+        (idx>0 ? `<span class="arrow">→</span>` : '') +
+        `<span class="stop${idx===0||idx===f.segment.length-1?' end':''}">${s}</span>`
+      ).join('');
+      return `<div class="result">
+        <div class="result-head">
+          <span class="bus-name">🚌 ${f.bus.name}</span>
+          <span>
+            <span class="badge">${f.segments} stop${f.segments>1?'s':''} · ~${distanceKm} km</span>
+            <span class="badge fare">Estimated fare: ৳${fare}</span>
+          </span>
+        </div>
+        <p class="direction">Direction: towards <strong>${f.towards}</strong> · ${f.segments - 1} stop${f.segments-1!==1?'s':''} in between</p>
+        <div class="segment">${segHtml}</div>
+      </div>`;
+    }).join('');
+}
+$('searchBtn').addEventListener('click', doSearch);
+[$('fromInput'), $('toInput')].forEach(inp => inp.addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); }));
+$('swapBtn').addEventListener('click', () => {
+  const a = $('fromInput').value; $('fromInput').value = $('toInput').value; $('toInput').value = a;
+});
+
+/* ================= bus directory ================= */
+let activeBus = null;
+function renderBusGrid(filter=''){
+  const grid = $('busGrid');
+  const list = BUSES.filter(b => b.name.toLowerCase().includes(filter.trim().toLowerCase()));
+  grid.innerHTML = list.length ? list.map(b =>
+    `<button class="bus-chip${activeBus===b.name?' active':''}" data-bus="${b.name}">
+       <span class="bname">🚌 ${b.name}</span>
+       <span class="bmeta">${b.stops[0]} → ${b.stops[b.stops.length-1]} · ${b.stops.length} stops</span>
+     </button>`).join('')
+    : `<p style="color:var(--muted);">No bus matches “${filter}”.</p>`;
+  grid.querySelectorAll('.bus-chip').forEach(chip =>
+    chip.addEventListener('click', () => showRoute(chip.dataset.bus)));
+}
+function showRoute(name){
+  const bus = BUSES.find(b => b.name === name);
+  if(!bus) return;
+  activeBus = name;
+  renderBusGrid($('busFilter').value);
+  $('routeDetail').style.display = 'block';
+  $('routeTitle').textContent = '🚌 ' + bus.name;
+  $('routeEnds').textContent = `Full route: ${bus.stops[0]} → ${bus.stops[bus.stops.length-1]} (${bus.stops.length} stops)`;
+  $('routeTimeline').innerHTML = bus.stops.map((s,idx) =>
+    `<li class="${idx===0?'first':''} ${idx===bus.stops.length-1?'last':''}">${s}${
+      idx===0 ? '<span class="tlabel">Start</span>' : idx===bus.stops.length-1 ? '<span class="tlabel">End</span>' : ''
+    }</li>`).join('');
+  $('routeDetail').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+$('busFilter').addEventListener('input', e => renderBusGrid(e.target.value));
+renderBusGrid();
+</script>
+</body>
+</html>
