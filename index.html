@@ -292,6 +292,14 @@ footer b{color:var(--text)}
 .dir-chips{display:flex;gap:8px;margin:12px 0 2px}
 .dir-chips button{border:1.5px solid var(--border,#dce5df);background:var(--card,#fff);color:var(--ink,#1c2530);border-radius:999px;padding:7px 16px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s}
 .dir-chips button.active{background:var(--green,#0e7a3d);border-color:var(--green,#0e7a3d);color:#fff}
+.mstation.inter{cursor:pointer}
+.mstation .mchev{margin-left:auto;color:var(--muted,#5b6b7a);font-size:13px;transition:transform .3s}
+.mstation.open .mchev{transform:rotate(180deg)}
+.mdetail{flex-basis:100%;max-height:0;overflow:hidden;transition:max-height .5s ease}
+.mdetail-in{padding:8px 2px 12px}
+.mdetail .brow{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--border,#dce5df)}
+.setfrom-btn{margin-top:10px;background:var(--green,#0e7a3d);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer}
+#gmapsBtn{margin-top:10px;width:100%;background:var(--card,#fff);border:1.5px solid var(--green,#0e7a3d);color:var(--green-dark,#0a5c2e);border-radius:12px;padding:11px;font-weight:800;font-size:14px;cursor:pointer}
 
 @media (max-width:560px){
   .appbar .brand small{display:none}
@@ -420,6 +428,7 @@ footer b{color:var(--text)}
       <div class="card">
         <div class="map-head"><b id="mapTitle">Route map</b><button id="mapClose" type="button" aria-label="Close map">✕</button></div>
         <div id="map"></div>
+        <button id="gmapsBtn" type="button" data-i18n="gmapsBtn">🌐 Open in Google Maps (live traffic)</button>
       </div>
     </div>
 
@@ -541,7 +550,8 @@ const STRINGS = {
     stopBoard: 'Stop Board', stopBoardSub: 'Every bus passing a stop', pickStop: 'Pick a stop',
     pickStopPh: 'Start typing a stop name…', stopBoardHint: 'Choose a stop above to see which buses stop there and where they go.',
     metroTitle: 'Metro Rail — MRT-6', metroSub: 'Uttara North ↔ Kamalapur',
-    metroNote: 'Tip: search results can combine a bus with the metro — get down at an interchange station and continue by Metro Rail to skip traffic.',
+    metroNote: 'Tip: search results can combine a bus with the metro — get down at an interchange station and continue by Metro Rail to skip traffic. Tap a "Bus interchange" station below to see which buses you can catch there.',
+    gmapsBtn: 'Open in Google Maps (live traffic)', busesFromHere: 'Buses you can catch from here', setFromBtn: 'Set as From', fromSet: 'Starting point set: ',
     interchange: 'Bus interchange',
     reportTitle: 'Report & Suggest', reportSub: 'Help keep the data right', reportType: 'Report type',
     rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
@@ -581,7 +591,8 @@ const STRINGS = {
     stopBoard: 'স্টপ বোর্ড', stopBoardSub: 'একটি স্টপ দিয়ে যাওয়া সব বাস', pickStop: 'একটি স্টপ বাছুন',
     pickStopPh: 'স্টপের নাম লিখতে শুরু করুন…', stopBoardHint: 'উপরে একটি স্টপ বাছুন — ওখানে কোন কোন বাস থামে আর কোথায় যায় দেখুন।',
     metroTitle: 'মেট্রো রেল — MRT-6', metroSub: 'উত্তরা উত্তর ↔ কমলাপুর',
-    metroNote: 'টিপস: সার্চ রেজাল্টে বাসের সাথে মেট্রো মিলিয়ে যাত্রা সাজানো হয় — ইন্টারচেঞ্জ স্টেশনে নেমে মেট্রোতে উঠলে যানজট এড়ানো যায়।',
+    metroNote: 'টিপস: সার্চ রেজাল্টে বাসের সাথে মেট্রো মিলিয়ে যাত্রা সাজানো হয় — ইন্টারচেঞ্জ স্টেশনে নেমে মেট্রোতে উঠলে যানজট এড়ানো যায়। কোন বাস পাবেন দেখতে নিচে "বাস ইন্টারচেঞ্জ" স্টেশনে ট্যাপ করুন।',
+    gmapsBtn: 'Google Maps-এ খুলুন (লাইভ ট্রাফিক)', busesFromHere: 'এখান থেকে যেসব বাস ধরতে পারবেন', setFromBtn: 'From হিসেবে নিন', fromSet: 'From সেট হয়েছে: ',
     interchange: 'বাস ইন্টারচেঞ্জ',
     reportTitle: 'রিপোর্ট ও পরামর্শ', reportSub: 'তথ্য ঠিক রাখতে সাহায্য করুন', reportType: 'রিপোর্টের ধরন',
     rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
@@ -1048,9 +1059,10 @@ function shareText(text) {
 /* =====================================================================
    Map, directory, stop board, metro, report, i18n, PWA
    ===================================================================== */
-let mapObj = null, mapLayers = null;
+let mapObj = null, mapLayers = null, mapJourney = null;
 function showMap(jn) {
   const s = S();
+  mapJourney = jn;
   const panel = $('mapPanel');
   panel.classList.add('show');
   $('mapTitle').textContent = s.routeMap + ': ' + stopName(lastFrom) + ' → ' + stopName(lastTo);
@@ -1087,6 +1099,18 @@ function drawJourney(jn) {
   if (line.length) mapObj.fitBounds(L.latLngBounds(line).pad(0.12));
 }
 $('mapClose').addEventListener('click', () => $('mapPanel').classList.remove('show'));
+$('gmapsBtn').addEventListener('click', () => {
+  if (!mapJourney) return;
+  const pts = [];
+  mapJourney.legs.forEach(leg => leg.stops.forEach(st => { const c = COORDS[st]; if (c) pts.push(c); }));
+  const uniq = pts.filter((p, i) => i === 0 || p[0] !== pts[i - 1][0] || p[1] !== pts[i - 1][1]);
+  if (uniq.length < 2) return;
+  let url = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(uniq[0].join(',')) +
+    '&destination=' + encodeURIComponent(uniq[uniq.length - 1].join(',')) + '&travelmode=driving';
+  const wp = uniq.slice(1, -1).slice(0, 9).map(p => p.join(',')).join('|');
+  if (wp) url += '&waypoints=' + encodeURIComponent(wp);
+  window.open(url, '_blank');
+});
 
 /* ---------- bus directory ---------- */
 function renderDirectory(filter) {
@@ -1147,14 +1171,38 @@ $('stopInput').addEventListener('input', () => {
 });
 
 /* ---------- metro timeline ---------- */
+function stationBusStop(st) { return st === 'Uttara South' ? 'Uttara' : st; }
 function renderMetro() {
   const inter = new Set((METRO.interchange || []).map(x => x === 'Uttara' ? 'Uttara South' : x));
   $('metroTimeline').innerHTML = (METRO.stations || []).map(st => {
     const isInter = inter.has(st);
-    return '<div class="mstation' + (isInter ? ' inter' : '') + '"><span class="mdot"></span><span class="mname">' + esc(stopName(st)) + '</span>' +
-      (isInter ? '<span class="itag">🚌 ' + esc(S().interchange) + '</span>' : '') + '</div>';
+    return '<div class="mstation' + (isInter ? ' inter' : '') + '" data-station="' + esc(st) + '"><span class="mdot"></span><span class="mname">' + esc(stopName(st)) + '</span>' +
+      (isInter ? '<span class="itag">🚌 ' + esc(S().interchange) + '</span><span class="mchev">▾</span><div class="mdetail"><div class="mdetail-in"></div></div>' : '') + '</div>';
   }).join('');
 }
+$('metroTimeline').addEventListener('click', e => {
+  const sf = e.target.closest('[data-setfrom]');
+  if (sf) {
+    const stop = sf.dataset.setfrom;
+    $('fromInput').value = stopName(stop);
+    window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+    toast(S().fromSet + stopName(stop));
+    return;
+  }
+  const row = e.target.closest('.mstation.inter');
+  if (!row) return;
+  const det = row.querySelector('.mdetail');
+  const open = row.classList.toggle('open');
+  if (open && !det.dataset.filled) {
+    const bs = stationBusStop(row.dataset.station);
+    const rows = BUSES.filter(b => b.stops.includes(bs));
+    det.querySelector('.mdetail-in').innerHTML = '<p style="font-weight:700;margin-bottom:2px">' + esc(S().busesFromHere) + ' — ' + esc(stopName(bs)) + ' (' + fmtN(rows.length) + ')</p>' +
+      rows.map(b => '<div class="brow"><span style="font-size:18px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span><div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span><span class="type-chip">' + esc(typeLabel(b.type)) + '</span></div>').join('') +
+      '<button type="button" class="setfrom-btn" data-setfrom="' + esc(bs) + '">' + esc(S().setFromBtn) + '</button>';
+    det.dataset.filled = '1';
+  }
+  det.style.maxHeight = open ? det.scrollHeight + 'px' : '0px';
+});
 
 /* ---------- report & suggest ---------- */
 function renderReports() {
