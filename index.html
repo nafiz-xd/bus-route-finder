@@ -1,249 +1,1189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dhaka Bus Route Finder — Find Your Bus</title>
-<meta name="description" content="Find which Dhaka city buses go from one place to another, with stop lists, direction and estimated fares.">
+<title>Dhaka Bus Route Finder — Bus, Transfer & Metro Routes with Fares</title>
+<meta name="description" content="Find Dhaka bus routes, one-transfer journeys and Metro Rail (MRT-6) combos with estimated fares and travel times. 46 bus services, 67+ stops, bilingual English/Bangla.">
+<meta property="og:title" content="Dhaka Bus Route Finder">
+<meta property="og:description" content="Bus, transfer & metro routes across Dhaka with fares and travel times.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://nafiz-xd.github.io/bus-route-finder/icon-512.png">
+<meta name="theme-color" content="#0e7a3d">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --green:#0e7a3d; --green-dark:#0a5c2e; --green-light:#e6f4ec;
-    --ink:#1c2530; --muted:#5b6b7a; --bg:#f4f7f5; --card:#ffffff;
-    --border:#dce5df; --amber:#f5a623; --radius:14px;
-    --shadow:0 4px 18px rgba(14,90,46,.08);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55;}
-  header{background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%); color:#fff; padding:34px 18px 30px; text-align:center;}
-  header .bus-icon{font-size:2.6rem; line-height:1;}
-  header h1{font-size:clamp(1.5rem,4.5vw,2.3rem); margin:8px 0 6px; letter-spacing:.3px;}
-  header p{opacity:.92; font-size:.98rem; max-width:560px; margin:0 auto;}
-  main{max-width:960px; margin:0 auto; padding:22px 16px 48px;}
-  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:22px;}
-  .card h2{font-size:1.15rem; color:var(--green-dark); margin-bottom:14px;}
-  .search-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:end;}
-  .field label{display:block; font-size:.82rem; font-weight:600; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px;}
-  .field input{width:100%; padding:12px 13px; border:1.5px solid var(--border); border-radius:10px; font-size:1rem; background:#fbfdfc; color:var(--ink);}
-  .field input:focus{outline:none; border-color:var(--green); background:#fff;}
-  #swapBtn{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--border); background:var(--green-light); color:var(--green-dark); font-size:1.15rem; cursor:pointer; margin-bottom:2px;}
-  #swapBtn:hover{background:var(--green); color:#fff;}
-  #searchBtn{width:100%; margin-top:14px; padding:13px; background:var(--green); color:#fff; border:none; border-radius:10px; font-size:1.02rem; font-weight:700; cursor:pointer;}
-  #searchBtn:hover{background:var(--green-dark);}
-  .hint{font-size:.85rem; color:var(--muted); margin-top:9px;}
-  .result{border:1px solid var(--border); border-left:5px solid var(--green); border-radius:10px; padding:14px 16px; margin-bottom:12px; background:#fbfdfc;}
-  .result-head{display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px; align-items:baseline;}
-  .result-head .bus-name{font-weight:700; font-size:1.06rem; color:var(--green-dark);}
-  .badge{background:var(--green-light); color:var(--green-dark); font-size:.78rem; font-weight:700; padding:3px 9px; border-radius:20px;}
-  .badge.fare{background:#fdf1d7; color:#8a5c00;}
-  .direction{font-size:.9rem; color:var(--muted); margin:4px 0 9px;}
-  .segment{display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:.88rem;}
-  .segment .stop{background:#eef3f0; border:1px solid var(--border); padding:2px 8px; border-radius:14px;}
-  .segment .stop.end{background:var(--green); color:#fff; border-color:var(--green); font-weight:600;}
-  .segment .arrow{color:var(--green); font-weight:700;}
-  .no-result{background:#fdf1d7; border:1px solid #f0d9a0; border-radius:10px; padding:14px 16px; font-size:.94rem;}
-  .filter-row input{width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:10px; font-size:.98rem; background:#fbfdfc;}
-  .filter-row input:focus{outline:none; border-color:var(--green); background:#fff;}
-  .bus-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-top:14px;}
-  .bus-chip{border:1.5px solid var(--border); background:#fbfdfc; border-radius:10px; padding:11px 13px; cursor:pointer; text-align:left; font-size:.95rem;}
-  .bus-chip:hover{border-color:var(--green);}
-  .bus-chip.active{border-color:var(--green); background:var(--green-light);}
-  .bus-chip .bname{font-weight:700; color:var(--green-dark); display:block;}
-  .bus-chip .bmeta{font-size:.8rem; color:var(--muted);}
-  #routeDetail{margin-top:18px; display:none;}
-  #routeDetail h3{color:var(--green-dark); font-size:1.05rem; margin-bottom:4px;}
-  #routeDetail .ends{font-size:.88rem; color:var(--muted); margin-bottom:14px;}
-  .timeline{list-style:none; position:relative; padding-left:26px;}
-  .timeline::before{content:''; position:absolute; left:8px; top:8px; bottom:8px; width:3px; background:var(--green); border-radius:2px; opacity:.35;}
-  .timeline li{position:relative; padding:5px 0; font-size:.95rem;}
-  .timeline li::before{content:''; position:absolute; left:-24px; top:11px; width:11px; height:11px; border-radius:50%; background:#fff; border:3px solid var(--green);}
-  .timeline li.first::before,.timeline li.last::before{background:var(--green);}
-  .timeline li .tlabel{font-size:.72rem; font-weight:700; color:var(--amber); text-transform:uppercase; letter-spacing:.5px; margin-left:6px;}
-  footer{text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 30px;}
-  @media (max-width:560px){
-    .search-grid{grid-template-columns:1fr;}
-    #swapBtn{margin:0 auto; transform:rotate(90deg);}
-  }
+:root{
+  --green:#0e7a3d; --green-dark:#0a5c2e; --green-light:#e6f4ec; --amber:#f5a623;
+  --bg:#eef5f0; --surface:#ffffff; --surface2:#f4f9f5; --text:#132a1d; --muted:#5d7266;
+  --border:#d9e8de; --danger:#c0392b; --shadow:0 12px 32px rgba(10,92,46,.14);
+  --shadow-sm:0 4px 14px rgba(10,92,46,.10); --radius:18px;
+}
+[data-theme="dark"]{
+  --bg:#0b120d; --surface:#141f17; --surface2:#1a291f; --text:#e9f3ec; --muted:#9db8a7;
+  --border:#26392c; --green-light:#173d27; --shadow:0 12px 32px rgba(0,0,0,.5);
+  --shadow-sm:0 4px 14px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Hind Siliguri',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);transition:background .4s ease,color .4s ease;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--text)}
+a{color:var(--green)}
+::selection{background:var(--green);color:#fff}
+
+/* ---------- splash ---------- */
+#splash{position:fixed;inset:0;z-index:2000;background:linear-gradient(150deg,var(--green-dark),var(--green) 55%,#13a354);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:transform .6s cubic-bezier(.7,0,.3,1),opacity .6s}
+#splash.gone{transform:translateY(-100%);opacity:.4;pointer-events:none}
+#splash .bus-badge{width:92px;height:92px;border-radius:28px;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:50px;animation:driveIn .8s cubic-bezier(.2,1.4,.4,1) both}
+#splash h1{color:#fff;font-size:27px;font-weight:700;letter-spacing:.3px;text-align:center;padding:0 16px}
+#splash h1 span{display:inline-block;animation:fadeUp .5s both;animation-delay:calc(var(--i)*45ms)}
+#splash p{color:rgba(255,255,255,.85);font-size:14px;animation:fadeUp .5s .5s both}
+#splash .bar{width:150px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden;margin-top:8px}
+#splash .bar i{display:block;height:100%;width:40%;border-radius:3px;background:#fff;animation:loadslide 1s ease-in-out infinite}
+@keyframes driveIn{from{transform:translateX(-70px) rotate(-6deg);opacity:0}to{transform:translateX(0) rotate(0);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes loadslide{0%{transform:translateX(-60px)}100%{transform:translateX(160px)}}
+
+/* ---------- app bar ---------- */
+.appbar{position:sticky;top:0;z-index:900;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);transition:background .4s}
+.appbar-in{max-width:1060px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.logo-tile{width:42px;height:42px;border-radius:13px;background:linear-gradient(140deg,var(--green),var(--green-dark));display:flex;align-items:center;justify-content:center;font-size:23px;box-shadow:var(--shadow-sm);flex:none}
+.appbar .brand{line-height:1.1;min-width:0}
+.appbar .brand b{font-size:17px;display:block;white-space:nowrap}
+.appbar .brand small{color:var(--muted);font-size:11.5px;white-space:nowrap}
+.appbar .spacer{flex:1}
+.icon-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;min-width:42px;height:42px;padding:0 10px;font-size:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .15s,background .3s}
+.icon-btn:hover{background:var(--surface2)}
+.icon-btn:active{transform:scale(.93)}
+#installBtn{display:none;background:var(--green);border-color:var(--green);color:#fff}
+#installBtn.show{display:inline-flex}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:linear-gradient(140deg,var(--green-dark) 0%,var(--green) 55%,#14a355 100%);color:#fff;padding:34px 16px 64px}
+.hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 52px,rgba(255,255,255,.055) 52px 55px);animation:stripes 12s linear infinite;pointer-events:none}
+@keyframes stripes{to{background-position:320px 0}}
+.blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.09);animation:floaty 8s ease-in-out infinite;pointer-events:none}
+.blob.b1{width:210px;height:210px;right:-60px;top:-70px}
+.blob.b2{width:130px;height:130px;left:-40px;bottom:6px;animation-delay:1.6s}
+.blob.b3{width:70px;height:70px;right:22%;bottom:22px;animation-delay:3s;background:rgba(245,166,35,.25)}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.hero-in{position:relative;z-index:2;max-width:1060px;margin:0 auto;text-align:center}
+.hero h2{font-size:clamp(25px,5.4vw,40px);font-weight:700;line-height:1.2;animation:fadeUp .6s both}
+.hero h2 .hl{color:#ffd98a}
+.hero p{opacity:.92;margin-top:8px;font-size:clamp(14px,2.6vw,16.5px);animation:fadeUp .6s .12s both}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;animation:fadeUp .6s .22s both}
+.stat{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:8px 18px;min-width:104px;backdrop-filter:blur(4px)}
+.stat b{font-size:21px;display:block;line-height:1.1}
+.stat small{font-size:12px;opacity:.9}
+
+/* ---------- layout ---------- */
+main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
+.wrap-narrow{max-width:760px;margin:0 auto}
+
+/* ---------- search card ---------- */
+.search-card{position:relative;z-index:5;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:20px;margin-top:-38px;border:1px solid var(--border);transition:background .4s}
+.field{position:relative;margin-bottom:6px}
+.field label{display:block;font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:0 0 5px 4px}
+.field .inwrap{position:relative}
+.field input{width:100%;padding:14px 46px 14px 42px;border:2px solid var(--border);border-radius:14px;background:var(--surface2);outline:none;transition:border-color .25s,box-shadow .25s}
+.field input:focus{border-color:var(--green);box-shadow:0 0 0 4px var(--green-light)}
+.field .dot-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:15px;height:15px;border-radius:50%;border:4px solid var(--green);background:var(--surface);pointer-events:none}
+.field .dot-ic.to{border-color:var(--amber);border-radius:50% 50% 50% 4px;transform:translateY(-50%) rotate(-45deg)}
+#nearBtn{position:absolute;right:7px;top:50%;transform:translateY(-50%);border:none;background:var(--green-light);color:var(--green-dark);font-size:12.5px;font-weight:700;border-radius:10px;padding:8px 10px;transition:transform .15s,background .3s}
+[data-theme="dark"] #nearBtn{color:#bfe6cf}
+#nearBtn:active{transform:translateY(-50%) scale(.94)}
+.swap-row{display:flex;justify-content:flex-end;padding:1px 6px}
+#swapBtn{width:40px;height:40px;border-radius:50%;border:2px solid var(--green);background:var(--surface);color:var(--green);font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .5s cubic-bezier(.55,-0.3,.3,1.35),background .3s;box-shadow:var(--shadow-sm)}
+#swapBtn.flipped{transform:rotate(180deg)}
+#swapBtn:active{scale:.92}
+.toggle-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:14px 2px 16px}
+.switch-wrap{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;cursor:pointer;user-select:none}
+.switch{position:relative;width:48px;height:27px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch .track{position:absolute;inset:0;border-radius:20px;background:var(--border);transition:.3s}
+.switch .track::after{content:'';position:absolute;left:3px;top:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:.3s}
+.switch input:checked + .track{background:var(--green)}
+.switch input:checked + .track::after{transform:translateX(21px)}
+.seg{display:flex;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:none;background:transparent;color:var(--muted);font-weight:700;font-size:13.5px;padding:7px 14px;border-radius:9px;transition:.25s}
+.seg button.active{background:var(--green);color:#fff;box-shadow:var(--shadow-sm)}
+#searchBtn{width:100%;border:none;border-radius:15px;padding:16px;font-size:17.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--green),var(--green-dark));box-shadow:0 10px 22px rgba(10,92,46,.32);display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .15s,filter .25s}
+#searchBtn:hover{filter:brightness(1.07)}
+#searchBtn:active{transform:scale(.98)}
+#searchBtn:disabled{opacity:.75;cursor:wait}
+.spinner{width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+#searchBtn.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+#searchError{display:none;margin-top:13px;background:#fdecea;color:var(--danger);border:1px solid #f5c6c0;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:600;animation:fadeUp .3s both}
+[data-theme="dark"] #searchError{background:#3a1d1a;border-color:#6e352e;color:#ffb4a8}
+#searchError.show{display:block}
+
+/* ---------- chips ---------- */
+.chip-groups{margin-top:20px}
+.chip-group{margin-bottom:12px}
+.chip-group h4{font-size:12.5px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin:0 0 8px 4px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1.5px solid var(--border);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;transition:.2s;box-shadow:var(--shadow-sm)}
+.chip:hover{border-color:var(--green);color:var(--green)}
+.chip:active{transform:scale(.95)}
+.chip .arr{color:var(--amber);font-weight:800;margin:0 2px}
+.chip.fav{border-color:var(--amber);background:#fff8ea}
+[data-theme="dark"] .chip.fav{background:#2c2410}
+
+/* ---------- section nav + sections ---------- */
+.sec-nav{display:flex;gap:8px;flex-wrap:wrap;margin:26px 0 4px}
+.sec-nav a{text-decoration:none;font-weight:700;font-size:14px;color:var(--green-dark);background:var(--green-light);padding:9px 16px;border-radius:999px;transition:.2s}
+[data-theme="dark"] .sec-nav a{color:#bfe6cf}
+.sec-nav a:active{transform:scale(.95)}
+section.block{margin-top:30px}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+.sec-head h3{font-size:21px;font-weight:700}
+.sec-head .sub{color:var(--muted);font-size:13.5px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);transition:background .4s}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.vis{opacity:1;transform:none}
+
+/* ---------- results ---------- */
+#resultsSection{margin-top:26px;display:none}
+#resultsSection.show{display:block}
+#resultsMeta{font-size:16.5px;font-weight:700;margin-bottom:12px}
+#resultsMeta .muted{color:var(--muted);font-weight:500;font-size:13.5px;display:block;margin-top:2px}
+.journey{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-sm);padding:16px 16px 13px;margin-bottom:14px;animation:cardIn .5s both;animation-delay:calc(var(--i)*100ms);overflow:hidden}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+.ribbons{position:absolute;top:0;right:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.ribbon{font-size:11px;font-weight:800;letter-spacing:.4px;color:#fff;padding:4px 10px;border-radius:0 0 0 10px;background:var(--amber)}
+.ribbon.fast{background:var(--green)}
+.j-head{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:6px;padding-right:74px}
+.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--green-light);color:var(--green-dark)}
+[data-theme="dark"] .badge{color:#bfe6cf}
+.badge.metro{background:#e8e4fb;color:#4b3f9e}
+[data-theme="dark"] .badge.metro{background:#2b2450;color:#cfc6ff}
+.badge.combo{background:#fdeeda;color:#9a6206}
+[data-theme="dark"] .badge.combo{background:#3a2c10;color:#ffd98a}
+.badge.fare{background:var(--green);color:#fff}
+.badge.time{background:var(--surface2);border:1.5px solid var(--border);color:var(--text)}
+.j-actions{display:flex;gap:8px;margin-top:12px;border-top:1px dashed var(--border);padding-top:11px}
+.j-actions button{flex:1;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:11px;padding:9px 4px;font-size:13.5px;font-weight:700;transition:.2s}
+.j-actions button:hover{border-color:var(--green);color:var(--green)}
+.j-actions button:active{transform:scale(.95)}
+.j-actions button.saved{border-color:var(--amber);background:#fff8ea;color:#9a6206}
+[data-theme="dark"] .j-actions button.saved{background:#2c2410;color:#ffd98a}
+
+/* journey timeline */
+.legs{margin-top:6px}
+.leg{position:relative;padding:2px 0 2px 32px}
+.leg::before{content:'';position:absolute;left:9px;top:26px;bottom:-4px;width:3px;border-radius:2px;background:linear-gradient(var(--green),#7cc79b);transform-origin:top;animation:lineGrow .55s .15s both}
+.leg.metro-leg::before{background:linear-gradient(#6a5acd,#b3a9ea)}
+.leg:last-child::before{display:none}
+@keyframes lineGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.trow{position:relative;display:flex;gap:10px;align-items:flex-start;padding:3px 0}
+.tdot{position:absolute;left:-32px;top:5px;width:17px;height:17px;border-radius:50%;border:3.5px solid var(--green);background:var(--surface);animation:popIn .35s both;animation-delay:var(--d,0s);z-index:2}
+.tdot.alight{background:var(--green)}
+.tdot.metro-dot{border-color:#6a5acd}
+.tdot.metro-dot.alight{background:#6a5acd}
+@keyframes popIn{from{transform:scale(0)}60%{transform:scale(1.35)}to{transform:scale(1)}}
+.trow .tname{font-weight:700;font-size:15px}
+.trow .tsub{color:var(--muted);font-size:12.5px;font-weight:600}
+.leg-mid{margin:5px 0 5px 0;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:9px 12px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.leg-mid .veh{font-size:16px}
+.leg-mid .svc{font-weight:800;font-size:14.5px}
+.type-chip{font-size:11px;font-weight:800;padding:2.5px 8px;border-radius:999px;background:var(--green-light);color:var(--green-dark)}
+[data-theme="dark"] .type-chip{color:#bfe6cf}
+.type-chip.metro{background:#e8e4fb;color:#4b3f9e}
+[data-theme="dark"] .type-chip.metro{background:#2b2450;color:#cfc6ff}
+.leg-mid .ride{color:var(--muted);font-size:13px;font-weight:600}
+.leg-mid .legfare{margin-left:auto;font-weight:800;color:var(--green);font-size:14px}
+.leg-mid .legfare small{display:block;text-align:right;color:var(--muted);font-weight:600;font-size:11.5px}
+.transfer{display:flex;align-items:center;gap:9px;margin:9px 0 9px 2px;animation:fadeUp .4s both;animation-delay:var(--d,0s)}
+.transfer .t-ic{width:24px;height:24px;flex:none;border-radius:50%;background:var(--amber);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:var(--shadow-sm)}
+.transfer .t-txt{font-size:13.5px;font-weight:700}
+.transfer .t-txt small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+.no-result{background:var(--surface);border:1px dashed var(--border);border-radius:16px;padding:22px;text-align:center;color:var(--muted);font-weight:600;animation:fadeUp .35s both}
+.skel-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:14px}
+.skel{height:15px;border-radius:7px;margin-bottom:11px;background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.05s infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+
+/* ---------- map ---------- */
+#mapPanel{display:none;margin-top:6px}
+#mapPanel.show{display:block;animation:fadeUp .4s both}
+#mapPanel .card{padding:10px}
+#map{height:340px;border-radius:12px;z-index:1;background:var(--surface2)}
+.map-head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 9px}
+.map-head b{font-size:15px}
+#mapClose{border:none;background:var(--surface2);border:1px solid var(--border);width:34px;height:34px;border-radius:10px;font-size:15px;color:var(--text)}
+.route-line{stroke-dasharray:10 8;animation:dashmove 1.1s linear infinite}
+@keyframes dashmove{to{stroke-dashoffset:-18}}
+.map-fallback{padding:26px;text-align:center;color:var(--muted);font-weight:600}
+
+/* ---------- directory ---------- */
+.filter-in{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:14px;background:var(--surface);outline:none;margin-bottom:12px;transition:border-color .25s}
+.filter-in:focus{border-color:var(--green)}
+.bus-row{border:1px solid var(--border);border-radius:15px;margin-bottom:9px;background:var(--surface);overflow:hidden;transition:box-shadow .3s}
+.bus-row.open{box-shadow:var(--shadow-sm)}
+.bus-head{width:100%;border:none;background:none;display:flex;align-items:center;gap:10px;padding:13px 15px;text-align:left;color:var(--text)}
+.bus-head .bname{font-weight:800;font-size:15.5px}
+.bus-head .broute{color:var(--muted);font-size:12.5px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44vw}
+.bus-head .chev{margin-left:auto;color:var(--muted);transition:transform .35s;font-size:15px;flex:none}
+.bus-row.open .chev{transform:rotate(180deg)}
+.bus-detail{max-height:0;overflow:hidden;transition:max-height .5s ease}
+.bus-detail-in{padding:2px 15px 15px}
+.info-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+.info-chips span{font-size:12.5px;font-weight:700;background:var(--surface2);border:1px solid var(--border);padding:5px 10px;border-radius:999px}
+.stop-strip{display:flex;gap:0;overflow-x:auto;padding:6px 2px 10px;scrollbar-width:thin}
+.stop-strip .stp{flex:none;display:flex;align-items:center;font-size:12.5px;font-weight:600;color:var(--text)}
+.stop-strip .stp i{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;flex:none}
+.stop-strip .arrw{flex:none;color:var(--muted);padding:0 7px;font-size:12px}
+
+/* ---------- stop board ---------- */
+.board-list .brow{display:flex;align-items:center;gap:11px;padding:11px 4px;border-bottom:1px dashed var(--border)}
+.board-list .brow:last-child{border-bottom:none}
+.board-list .bname{font-weight:800}
+.board-list .bmeta{color:var(--muted);font-size:12.5px;font-weight:600}
+.board-list .pos{margin-left:auto;flex:none;font-size:12px;font-weight:800;background:var(--green-light);color:var(--green-dark);padding:4px 9px;border-radius:999px}
+[data-theme="dark"] .board-list .pos{color:#bfe6cf}
+
+/* ---------- metro ---------- */
+.metro-card{padding:18px}
+.metro-line{position:relative;margin-top:8px}
+.mstation{position:relative;padding:7px 0 7px 34px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.mstation::before{content:'';position:absolute;left:9px;top:0;bottom:0;width:3px;background:#c9c2f2}
+.mstation:first-child::before{top:16px}
+.mstation:last-child::before{bottom:auto;height:16px}
+.mdot{position:absolute;left:2px;top:12px;width:17px;height:17px;border-radius:50%;border:3.5px solid #6a5acd;background:var(--surface);z-index:2}
+.mstation.inter .mdot{border-color:var(--amber);background:var(--amber)}
+.mstation .mname{font-weight:700;font-size:15px}
+.mstation .itag{font-size:11px;font-weight:800;background:#fdeeda;color:#9a6206;padding:3px 8px;border-radius:999px}
+[data-theme="dark"] .mstation .itag{background:#3a2c10;color:#ffd98a}
+.metro-note{margin-top:12px;background:var(--green-light);border-radius:12px;padding:12px 14px;font-size:13.5px;font-weight:600;color:var(--green-dark)}
+[data-theme="dark"] .metro-note{color:#bfe6cf}
+
+/* ---------- report ---------- */
+.report-card{padding:18px}
+.report-card label{display:block;font-size:13px;font-weight:700;margin:12px 0 5px}
+.report-card select,.report-card textarea,.report-card input[type="text"]{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;background:var(--surface2);outline:none;transition:border-color .25s}
+.report-card select:focus,.report-card textarea:focus,.report-card input:focus{border-color:var(--green)}
+.report-card textarea{resize:vertical;min-height:84px}
+#reportSubmit{margin-top:15px;width:100%;border:none;border-radius:13px;padding:14px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--green),var(--green-dark));transition:transform .15s}
+#reportSubmit:active{transform:scale(.98)}
+#reportMsg{display:none;margin-top:12px;background:var(--green-light);color:var(--green-dark);border-radius:12px;padding:12px 14px;font-weight:600;font-size:14px}
+[data-theme="dark"] #reportMsg{color:#bfe6cf}
+#reportMsg.show{display:block;animation:fadeUp .3s both}
+#shareReportBtn{margin-top:9px;border:1.5px solid var(--green);background:var(--surface);color:var(--green);border-radius:10px;padding:8px 14px;font-weight:700;font-size:13.5px}
+.myrep{margin-top:16px}
+.myrep h5{font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.rep-item{border:1px solid var(--border);border-radius:12px;padding:10px 13px;margin-bottom:8px;background:var(--surface2);font-size:13.5px}
+.rep-item b{color:var(--green-dark)}
+[data-theme="dark"] .rep-item b{color:#bfe6cf}
+.rep-item small{color:var(--muted);display:block;margin-top:2px}
+.report-note{font-size:13px;color:var(--muted);margin-top:10px;font-weight:500}
+
+/* ---------- footer / toast ---------- */
+footer{max-width:1060px;margin:36px auto 0;padding:22px 16px 34px;text-align:center;color:var(--muted);font-size:13.5px;border-top:1px solid var(--border)}
+footer b{color:var(--text)}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,80px);background:#17301f;color:#eafff1;padding:12px 20px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 14px 30px rgba(0,0,0,.3);z-index:1500;transition:transform .4s cubic-bezier(.2,1.2,.3,1);pointer-events:none;max-width:88vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+
+@media (max-width:560px){
+  .appbar .brand small{display:none}
+  .bus-head .broute{max-width:36vw}
+  #map{height:290px}
+  .j-head{padding-right:0}
+  .ribbons{position:static;flex-direction:row;margin-bottom:8px}
+  .ribbon{border-radius:999px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="bus-icon">🚌</div>
-  <h1>Dhaka Bus Route Finder</h1>
-  <p>Type where you are and where you want to go — get every city bus that connects them, with direction, stops and an estimated fare.</p>
+<!-- splash -->
+<div id="splash" role="presentation">
+  <div class="bus-badge">🚌</div>
+  <h1 id="splashName">Dhaka Bus Route Finder</h1>
+  <p data-i18n="tagline">Bus, transfer &amp; metro routes with fares</p>
+  <div class="bar"><i></i></div>
+</div>
+
+<!-- app bar -->
+<header class="appbar">
+  <div class="appbar-in">
+    <div class="logo-tile">🚌</div>
+    <div class="brand">
+      <b data-i18n="appName">Dhaka Bus Route Finder</b>
+      <small data-i18n="tagline">Bus, transfer &amp; metro routes with fares</small>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="installBtn" type="button">⬇ <span data-i18n="install">Install</span></button>
+    <button class="icon-btn" id="langBtn" type="button" aria-label="Language">বাং</button>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Dark mode">🌙</button>
+  </div>
 </header>
 
+<!-- hero -->
+<div class="hero">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="hero-in">
+    <h2><span data-i18n="heroTitleA">Where do you want to</span> <span class="hl" data-i18n="heroTitleB">go today?</span></h2>
+    <p data-i18n="heroSub">Direct buses, smart one-transfer journeys and Metro Rail combos — with fares &amp; travel times.</p>
+    <div class="stats">
+      <div class="stat"><b id="statBuses">0</b><small data-i18n="statBuses">Bus services</small></div>
+      <div class="stat"><b id="statStops">0</b><small data-i18n="statStops">Stops covered</small></div>
+      <div class="stat"><b id="statMetro">0</b><small data-i18n="statMetro">Metro stations</small></div>
+    </div>
+  </div>
+</div>
+
 <main>
-  <!-- ============ SEARCH ============ -->
-  <section class="card">
-    <h2>🔍 Find a Bus</h2>
-    <div class="search-grid">
+  <div class="wrap-narrow">
+    <!-- search card -->
+    <div class="search-card">
       <div class="field">
-        <label for="fromInput">From</label>
-        <input id="fromInput" list="stopList" placeholder="e.g. Mirpur 10" autocomplete="off">
+        <label for="fromInput" data-i18n="fromLabel">From</label>
+        <div class="inwrap">
+          <span class="dot-ic"></span>
+          <input id="fromInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
+          <button id="nearBtn" type="button">📍 <span data-i18n="nearMe">Near me</span></button>
+        </div>
       </div>
-      <button id="swapBtn" title="Swap From / To" aria-label="Swap From and To">⇄</button>
+      <div class="swap-row">
+        <button id="swapBtn" type="button" aria-label="Swap from and to">⇅</button>
+      </div>
       <div class="field">
-        <label for="toInput">To</label>
-        <input id="toInput" list="stopList" placeholder="e.g. Motijheel" autocomplete="off">
+        <label for="toInput" data-i18n="toLabel">To</label>
+        <div class="inwrap">
+          <span class="dot-ic to"></span>
+          <input id="toInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="toPh" placeholder="To — where do you want to go?">
+        </div>
+      </div>
+      <datalist id="stopList"></datalist>
+
+      <div class="toggle-row">
+        <label class="switch-wrap">
+          <span class="switch"><input type="checkbox" id="studentToggle"><span class="track"></span></span>
+          <span data-i18n="student">Student half fare</span>
+        </label>
+        <div class="seg" role="group" aria-label="Traffic">
+          <button type="button" id="segOff" class="active" data-i18n="offpeak">Off-peak</button>
+          <button type="button" id="segPeak" data-i18n="peak">Peak</button>
+        </div>
+      </div>
+
+      <button id="searchBtn" type="button"><span class="spinner"></span><span id="searchBtnText" data-i18n="search">Search routes</span></button>
+      <div id="searchError" role="alert"></div>
+    </div>
+
+    <!-- quick chips -->
+    <div class="chip-groups">
+      <div class="chip-group">
+        <h4 data-i18n="popular">Popular routes</h4>
+        <div class="chips" id="chipsPopular"></div>
+      </div>
+      <div class="chip-group" id="favGroup" hidden>
+        <h4>★ <span data-i18n="favorites">Favorites</span></h4>
+        <div class="chips" id="chipsFavs"></div>
+      </div>
+      <div class="chip-group" id="recentGroup" hidden>
+        <h4 data-i18n="recent">Recent searches</h4>
+        <div class="chips" id="chipsRecent"></div>
       </div>
     </div>
-    <datalist id="stopList"></datalist>
-    <button id="searchBtn">Search Buses</button>
-    <p class="hint">Start typing a place name and pick from the suggestions. Fare is an estimate based on distance.</p>
-    <div id="results" style="margin-top:16px;"></div>
+
+    <!-- results -->
+    <section id="resultsSection">
+      <div id="resultsMeta"></div>
+      <div id="resultsList"></div>
+    </section>
+
+    <!-- map -->
+    <div id="mapPanel">
+      <div class="card">
+        <div class="map-head"><b id="mapTitle">Route map</b><button id="mapClose" type="button" aria-label="Close map">✕</button></div>
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <nav class="sec-nav">
+      <a href="#busesSection">🚌 <span data-i18n="navBuses">All Buses</span></a>
+      <a href="#stopSection">🚏 <span data-i18n="navStop">Stop Board</span></a>
+      <a href="#metroSection">🚇 <span data-i18n="navMetro">Metro Rail</span></a>
+      <a href="#reportSection">✍️ <span data-i18n="navReport">Report &amp; Suggest</span></a>
+    </nav>
+  </div>
+
+  <!-- all buses -->
+  <section class="block reveal" id="busesSection">
+    <div class="sec-head"><h3>🚌 <span data-i18n="allBuses">All Bus Services</span></h3><span class="sub" data-i18n="allBusesSub">Tap a bus to see its full route</span></div>
+    <input class="filter-in" id="busFilter" type="text" data-i18n-ph="busFilterPh" placeholder="Filter buses by name…">
+    <div id="busList"></div>
   </section>
 
-  <!-- ============ ALL BUSES ============ -->
-  <section class="card">
-    <h2>🗂️ All Bus Routes</h2>
-    <div class="filter-row">
-      <input id="busFilter" type="text" placeholder="Filter buses by name… e.g. Raida" autocomplete="off">
+  <!-- stop board -->
+  <section class="block reveal" id="stopSection">
+    <div class="sec-head"><h3>🚏 <span data-i18n="stopBoard">Stop Board</span></h3><span class="sub" data-i18n="stopBoardSub">Every bus passing a stop</span></div>
+    <div class="card" style="padding:16px">
+      <div class="field" style="margin-bottom:10px">
+        <label for="stopInput" data-i18n="pickStop">Pick a stop</label>
+        <div class="inwrap">
+          <span class="dot-ic"></span>
+          <input id="stopInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="pickStopPh" placeholder="Start typing a stop name…">
+        </div>
+      </div>
+      <div class="board-list" id="stopBoardList">
+        <p style="color:var(--muted);font-weight:600" data-i18n="stopBoardHint">Choose a stop above to see which buses stop there and where they go.</p>
+      </div>
     </div>
-    <div class="bus-grid" id="busGrid"></div>
-    <div id="routeDetail">
-      <h3 id="routeTitle"></h3>
-      <p class="ends" id="routeEnds"></p>
-      <ul class="timeline" id="routeTimeline"></ul>
+  </section>
+
+  <!-- metro -->
+  <section class="block reveal" id="metroSection">
+    <div class="sec-head"><h3>🚇 <span data-i18n="metroTitle">Metro Rail — MRT-6</span></h3><span class="sub" data-i18n="metroSub">Uttara North ↔ Kamalapur</span></div>
+    <div class="card metro-card">
+      <div class="metro-line" id="metroTimeline"></div>
+      <div class="metro-note" data-i18n="metroNote">Tip: search results can combine a bus with the metro — get down at an interchange station and continue by Metro Rail to skip traffic.</div>
+    </div>
+  </section>
+
+  <!-- report -->
+  <section class="block reveal" id="reportSection">
+    <div class="sec-head"><h3>✍️ <span data-i18n="reportTitle">Report &amp; Suggest</span></h3><span class="sub" data-i18n="reportSub">Help keep the data right</span></div>
+    <div class="card report-card">
+      <form id="reportForm">
+        <label for="reportType" data-i18n="reportType">Report type</label>
+        <select id="reportType">
+          <option value="wrong" data-i18n="rtWrong">Wrong route info</option>
+          <option value="bus" data-i18n="rtBus">Missing bus</option>
+          <option value="stop" data-i18n="rtStop">Missing stop</option>
+          <option value="other" data-i18n="rtOther">Other</option>
+        </select>
+        <label for="reportDetails" data-i18n="reportDetails">Details</label>
+        <textarea id="reportDetails" data-i18n-ph="reportDetailsPh" placeholder="Tell us what is wrong or missing…"></textarea>
+        <label for="reportName" data-i18n="reportName">Your name (optional)</label>
+        <input type="text" id="reportName" data-i18n-ph="reportNamePh" placeholder="e.g. Rahim">
+        <button id="reportSubmit" type="submit" data-i18n="reportSubmit">Submit report</button>
+      </form>
+      <div id="reportMsg"></div>
+      <p class="report-note" data-i18n="reportNote">Reports are saved on this device. Sharing your report helps us fix the data for everyone — thank you!</p>
+      <div class="myrep" id="myReports" hidden>
+        <h5 data-i18n="myReports">My reports on this device</h5>
+        <div id="reportList"></div>
+      </div>
     </div>
   </section>
 </main>
 
 <footer>
-  Dhaka Bus Route Finder · Routes and fares are approximate — please confirm with the conductor. Made by Nafiz Bin Azad.
+  <p><b data-i18n="appName">Dhaka Bus Route Finder</b> · v2.0</p>
+  <p data-i18n="disclaimer">Route data is community-maintained and approximate — please verify before travelling.</p>
+  <p><span data-i18n="madeBy">Made by</span> <b>Nafiz Bin Azad</b></p>
 </footer>
 
+<div id="toast" role="status"></div>
+
+<script src="routes.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-/* ================= DATA: Dhaka local bus services ================= */
-const BUSES = [
-  { name:"Raida", stops:["Abdullahpur","Uttara","Airport","Khilkhet","Kuril Bishwa Road","Notun Bazar","Gulshan","Badda","Rampura","Malibagh","Moghbazar","Kakrail","Paltan","Gulistan","Motijheel"] },
-  { name:"Victor Paribahan", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Agargaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Paltan","Gulistan","Motijheel"] },
-  { name:"Akash", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari"] },
-  { name:"Shadhin", stops:["Shyamoli","Mohammadpur","Dhanmondi","Science Lab","Elephant Road","Shahbagh","Press Club","Paltan","Gulistan","Motijheel"] },
-  { name:"Midline", stops:["Gabtoli","Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Tejgaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Gulistan","Motijheel"] },
-  { name:"Trans Silva", stops:["Mirpur 1","Gabtoli","Technical","Kalyanpur","Shyamoli","Mohammadpur","Dhanmondi","Science Lab","New Market","Azimpur"] },
-  { name:"Labbaik", stops:["Tongi","Abdullahpur","Uttara","Airport","Kuril Bishwa Road","Banani","Gulshan","Mohakhali","Agargaon","Shewrapara","Kazipara","Mirpur 10","Mirpur 1","Gabtoli"] },
-  { name:"Mirpur Metro", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari"] },
-  { name:"BRTC", stops:["Abdullahpur","Uttara","Airport","Banani","Gulshan","Mohakhali","Tejgaon","Farmgate","Shahbagh","Press Club","Gulistan","Motijheel"] },
-  { name:"Asmani", stops:["Azimpur","New Market","Science Lab","Dhanmondi","Mohammadpur","Shyamoli","Kalyanpur","Technical","Gabtoli","Mirpur 1","Mirpur 10","Pallabi"] },
-  { name:"Ramjan", stops:["Mohammadpur","Shyamoli","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Gulshan","Badda","Rampura","Malibagh","Khilgaon","Basabo","Sayedabad"] },
-  { name:"Turag", stops:["Tongi","Abdullahpur","Uttara","Airport","Banani","Gulshan","Mohakhali","Tejgaon","Farmgate","Shahbagh","Science Lab","New Market","Azimpur"] },
-  { name:"Projapoti", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Agargaon","Farmgate","Karwan Bazar","Moghbazar","Malibagh","Khilgaon","Basabo","Sayedabad","Jatrabari"] },
-  { name:"Alif", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Gulshan","Badda","Rampura"] },
-  { name:"Bhuiyan", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Mohammadpur","Dhanmondi","Science Lab","Shahbagh","Press Club","Paltan","Gulistan","Sayedabad","Jatrabari"] },
-  { name:"Safa Marwa", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari","Sign Board"] }
-];
+'use strict';
+/* =====================================================================
+   Dhaka Bus Route Finder v2 — data prep + pure routing logic (no DOM)
+   ===================================================================== */
+const DATA = window.BUS_DATA || { buses: [], metro: { name: 'MRT-6', stations: [], interchange: [] }, stopCoords: {}, stopBn: {} };
+const BUSES = DATA.buses || [];
+const METRO = DATA.metro || { stations: [], interchange: [] };
+const COORDS = DATA.stopCoords || {};
+const STOP_BN = DATA.stopBn || {};
+const METRO_NAME = 'Metro Rail (MRT-6)';
 
-/* ================= helpers ================= */
-const $ = id => document.getElementById(id);
-const allStops = [...new Set(BUSES.flatMap(b => b.stops))].sort();
-$('stopList').innerHTML = allStops.map(s => `<option value="${s}">`).join('');
+/* services = buses + metro pseudo-service */
+const SERVICES = BUSES.map(b => ({ name: b.name, kind: 'bus', type: b.type || 'Non-AC', first: b.first, last: b.last, freq: b.freq, stops: b.stops.slice() }));
+SERVICES.push({ name: METRO_NAME, kind: 'metro', type: 'Metro', stops: (METRO.stations || []).slice() });
 
-function matchStop(text){
-  if(!text) return null;
-  const t = text.trim().toLowerCase().replace(/\s+/g,' ');
-  if(!t) return null;
-  const exact = allStops.find(s => s.toLowerCase() === t);
-  if(exact) return exact;
-  const starts = allStops.filter(s => s.toLowerCase().startsWith(t));
-  if(starts.length === 1) return starts[0];
-  const contains = allStops.filter(s => s.toLowerCase().includes(t));
-  if(contains.length === 1) return contains[0];
+const ALL_STOPS = [...new Set(SERVICES.flatMap(s => s.stops))].sort();
+const INTERCHANGE = new Set(METRO.interchange || []); // bus-stop names that connect to the metro
+
+/* ---------- i18n ---------- */
+const STRINGS = {
+  en: {
+    appName: 'Dhaka Bus Route Finder', tagline: 'Bus, transfer & metro routes with fares', install: 'Install',
+    heroTitleA: 'Where do you want to', heroTitleB: 'go today?',
+    heroSub: 'Direct buses, smart one-transfer journeys and Metro Rail combos — with fares & travel times.',
+    statBuses: 'Bus services', statStops: 'Stops covered', statMetro: 'Metro stations',
+    fromLabel: 'From', toLabel: 'To', fromPh: 'From — where are you starting?', toPh: 'To — where do you want to go?',
+    nearMe: 'Near me', locating: 'Locating…', student: 'Student half fare', peak: 'Peak', offpeak: 'Off-peak',
+    search: 'Search routes', popular: 'Popular routes', favorites: 'Favorites', recent: 'Recent searches',
+    navBuses: 'All Buses', navStop: 'Stop Board', navMetro: 'Metro Rail', navReport: 'Report & Suggest',
+    allBuses: 'All Bus Services', allBusesSub: 'Tap a bus to see its full route', busFilterPh: 'Filter buses by name…',
+    stopBoard: 'Stop Board', stopBoardSub: 'Every bus passing a stop', pickStop: 'Pick a stop',
+    pickStopPh: 'Start typing a stop name…', stopBoardHint: 'Choose a stop above to see which buses stop there and where they go.',
+    metroTitle: 'Metro Rail — MRT-6', metroSub: 'Uttara North ↔ Kamalapur',
+    metroNote: 'Tip: search results can combine a bus with the metro — get down at an interchange station and continue by Metro Rail to skip traffic.',
+    interchange: 'Bus interchange',
+    reportTitle: 'Report & Suggest', reportSub: 'Help keep the data right', reportType: 'Report type',
+    rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
+    reportDetails: 'Details', reportDetailsPh: 'Tell us what is wrong or missing…',
+    reportName: 'Your name (optional)', reportNamePh: 'e.g. Rahim', reportSubmit: 'Submit report',
+    reportNote: 'Reports are saved on this device. Sharing your report helps us fix the data for everyone — thank you!',
+    myReports: 'My reports on this device', shareReport: 'Share report',
+    disclaimer: 'Route data is community-maintained and approximate — please verify before travelling.', madeBy: 'Made by',
+    direct: 'Direct', oneTransfer: '1 Transfer', metroCombo: 'Metro combo', metro: 'Metro',
+    fastest: 'FASTEST', cheapest: 'CHEAPEST',
+    boardAt: 'Board here', getDownAt: 'Get down here', towards: 'towards', stopsWord: 'stops', stopWord: 'stop',
+    changeHere: 'Change here', transferWalk: 'Walk to the connecting service', via: 'via',
+    mapBtn: '🗺 Map', saveBtn: '☆ Save', savedBtn: '★ Saved', shareBtn: '↗ Share',
+    totalFare: 'Total fare', mapTitle: 'Route map', routeMap: 'Route map',
+    resultsWord: 'route options', noRoute: 'No route found between these two stops yet. Try a nearby stop, or report the missing connection below.',
+    errEmpty: 'Please enter both a From and a To place.', errSame: 'From and To are the same place — pick two different stops.',
+    firstBus: 'First', lastBus: 'Last', every: 'Every', busesVia: 'buses pass this stop', noBusVia: 'No bus found for this stop yet.',
+    reportThanks: 'Thanks! Your report was saved on this device.', reportEmpty: 'Please write a few details first.',
+    copied: 'Copied to clipboard', sharedOk: 'Shared — thank you!', nearestSet: 'Nearest stop set: ',
+    geoErr: 'Could not get your location. Please type your stop instead.', geoNA: 'Location is not available on this device.',
+    mapFail: 'Map could not be loaded (it needs internet). The journey details above are still complete.',
+    studentTag: 'student', youAreHere: 'You are here', shareTextIntro: 'Dhaka Bus Route Finder',
+    repTypeNames: { wrong: 'Wrong route info', bus: 'Missing bus', stop: 'Missing stop', other: 'Other' }
+  },
+  bn: {
+    appName: 'ঢাকা বাস রুট ফাইন্ডার', tagline: 'বাস, ট্রান্সফার ও মেট্রো রুট — ভাড়াসহ', install: 'ইনস্টল',
+    heroTitleA: 'আজ কোথায়', heroTitleB: 'যেতে চান?',
+    heroSub: 'সরাসরি বাস, স্মার্ট একবার-বদলি যাত্রা আর মেট্রো রেল কম্বো — ভাড়া ও সময়সহ।',
+    statBuses: 'বাস সার্ভিস', statStops: 'স্টপ কভারেজ', statMetro: 'মেট্রো স্টেশন',
+    fromLabel: 'যাত্রা শুরু', toLabel: 'গন্তব্য', fromPh: 'কোথা থেকে যাত্রা শুরু?', toPh: 'কোথায় যেতে চান?',
+    nearMe: 'আমার কাছে', locating: 'খোঁজা হচ্ছে…', student: 'ছাত্র অর্ধেক ভাড়া', peak: 'ভিড়ের সময়', offpeak: 'স্বাভাবিক সময়',
+    search: 'রুট খুঁজুন', popular: 'জনপ্রিয় রুট', favorites: 'পছন্দের রুট', recent: 'সাম্প্রতিক অনুসন্ধান',
+    navBuses: 'সব বাস', navStop: 'স্টপ বোর্ড', navMetro: 'মেট্রো রেল', navReport: 'রিপোর্ট ও পরামর্শ',
+    allBuses: 'সব বাস সার্ভিস', allBusesSub: 'পুরো রুট দেখতে বাসে ট্যাপ করুন', busFilterPh: 'বাসের নাম দিয়ে খুঁজুন…',
+    stopBoard: 'স্টপ বোর্ড', stopBoardSub: 'একটি স্টপ দিয়ে যাওয়া সব বাস', pickStop: 'একটি স্টপ বাছুন',
+    pickStopPh: 'স্টপের নাম লিখতে শুরু করুন…', stopBoardHint: 'উপরে একটি স্টপ বাছুন — ওখানে কোন কোন বাস থামে আর কোথায় যায় দেখুন।',
+    metroTitle: 'মেট্রো রেল — MRT-6', metroSub: 'উত্তরা উত্তর ↔ কমলাপুর',
+    metroNote: 'টিপস: সার্চ রেজাল্টে বাসের সাথে মেট্রো মিলিয়ে যাত্রা সাজানো হয় — ইন্টারচেঞ্জ স্টেশনে নেমে মেট্রোতে উঠলে যানজট এড়ানো যায়।',
+    interchange: 'বাস ইন্টারচেঞ্জ',
+    reportTitle: 'রিপোর্ট ও পরামর্শ', reportSub: 'তথ্য ঠিক রাখতে সাহায্য করুন', reportType: 'রিপোর্টের ধরন',
+    rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
+    reportDetails: 'বিস্তারিত', reportDetailsPh: 'কী ভুল বা কী নেই, লিখুন…',
+    reportName: 'আপনার নাম (ঐচ্ছিক)', reportNamePh: 'যেমন: রহিম', reportSubmit: 'রিপোর্ট জমা দিন',
+    reportNote: 'রিপোর্ট এই ডিভাইসেই সেভ থাকে। রিপোর্ট শেয়ার করলে সবার জন্য তথ্য ঠিক করতে সাহায্য হয় — ধন্যবাদ!',
+    myReports: 'এই ডিভাইসে আমার রিপোর্ট', shareReport: 'রিপোর্ট শেয়ার করুন',
+    disclaimer: 'রুটের তথ্য কমিউনিটি-রক্ষিত ও আনুমানিক — যাত্রার আগে যাচাই করে নিন।', madeBy: 'তৈরি করেছেন',
+    direct: 'সরাসরি', oneTransfer: '১ বার বদলি', metroCombo: 'মেট্রো কম্বো', metro: 'মেট্রো',
+    fastest: 'সবচেয়ে দ্রুত', cheapest: 'সবচেয়ে সস্তা',
+    boardAt: 'এখানে উঠুন', getDownAt: 'এখানে নামুন', towards: 'অভিমুখে', stopsWord: 'স্টপ', stopWord: 'স্টপ',
+    changeHere: 'এখানে বদলান', transferWalk: 'পরের সার্ভিসে উঠুন', via: 'হয়ে',
+    mapBtn: '🗺 ম্যাপ', saveBtn: '☆ সেভ', savedBtn: '★ সেভ হয়েছে', shareBtn: '↗ শেয়ার',
+    totalFare: 'মোট ভাড়া', mapTitle: 'রুটের ম্যাপ', routeMap: 'রুটের ম্যাপ',
+    resultsWord: 'রুট অপশন', noRoute: 'এই দুই স্টপের মধ্যে এখনো কোনো রুট পাওয়া যায়নি। কাছের অন্য স্টপ চেষ্টা করুন, অথবা নিচে রিপোর্ট করে জানান।',
+    errEmpty: 'From আর To — দুটো জায়গাই লিখুন।', errSame: 'From আর To একই জায়গা — দুটি আলাদা স্টপ বাছুন।',
+    firstBus: 'প্রথম', lastBus: 'শেষ', every: 'প্রতি', busesVia: 'টি বাস এই স্টপ দিয়ে যায়', noBusVia: 'এই স্টপের জন্য এখনো কোনো বাস পাওয়া যায়নি।',
+    reportThanks: 'ধন্যবাদ! আপনার রিপোর্ট এই ডিভাইসে সেভ হয়েছে।', reportEmpty: 'আগে কিছু বিস্তারিত লিখুন।',
+    copied: 'ক্লিপবোর্ডে কপি হয়েছে', sharedOk: 'শেয়ার হয়েছে — ধন্যবাদ!', nearestSet: 'সবচেয়ে কাছের স্টপ সেট হয়েছে: ',
+    geoErr: 'আপনার লোকেশন পাওয়া যায়নি। স্টপের নাম লিখে দিন।', geoNA: 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।',
+    mapFail: 'ম্যাপ লোড করা যায়নি (ইন্টারনেট লাগে)। উপরের যাত্রার বিবরণ ঠিকঠাক আছে।',
+    studentTag: 'ছাত্র', youAreHere: 'আপনি এখানে', shareTextIntro: 'ঢাকা বাস রুট ফাইন্ডার',
+    repTypeNames: { wrong: 'ভুল রুট তথ্য', bus: 'বাস নেই', stop: 'স্টপ নেই', other: 'অন্যান্য' }
+  }
+};
+
+/* ---------- helpers (pure) ---------- */
+const BN_DIGITS = '০১২৩৪৫৬৭৮৯';
+function bnDigits(s) { return String(s).replace(/[0-9]/g, d => BN_DIGITS[d]); }
+function enDigits(s) { return String(s).replace(/[০-৯]/g, d => BN_DIGITS.indexOf(d)); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+/* tolerant stop matching: EN exact (ci) → BN exact → unique startsWith → unique contains */
+function matchStop(text) {
+  if (!text) return null;
+  const raw = String(text).trim().replace(/\s+/g, ' ');
+  if (!raw) return null;
+  const tEn = enDigits(raw).toLowerCase();
+  for (const s of ALL_STOPS) if (s.toLowerCase() === tEn) return s;
+  for (const s of ALL_STOPS) if ((STOP_BN[s] || '') === raw) return s;
+  const bnNorm = bnDigits(enDigits(raw));
+  for (const s of ALL_STOPS) if ((STOP_BN[s] || '') === bnNorm) return s;
+  let hits = ALL_STOPS.filter(s => s.toLowerCase().startsWith(tEn));
+  if (hits.length === 1) return hits[0];
+  hits = ALL_STOPS.filter(s => (STOP_BN[s] || '').startsWith(raw) || (STOP_BN[s] || '').startsWith(bnNorm));
+  if (hits.length === 1) return hits[0];
+  hits = ALL_STOPS.filter(s => s.toLowerCase().includes(tEn));
+  if (hits.length === 1) return hits[0];
+  hits = ALL_STOPS.filter(s => (STOP_BN[s] || '').includes(raw));
+  if (hits.length === 1) return hits[0];
   return null;
 }
-function estimateFare(segments){
-  const distanceKm = segments * 1.1;
-  const fare = Math.max(10, Math.round(distanceKm * 2.45));
-  return { distanceKm: distanceKm.toFixed(1), fare };
+
+/* ---------- routing engine ---------- */
+function legMath(svc, i, j, opts) {
+  const segs = Math.abs(j - i);
+  const isMetro = svc.kind === 'metro';
+  const km = segs * (isMetro ? 1.05 : 1.1);
+  let fare;
+  if (isMetro) {
+    fare = Math.min(100, Math.max(20, Math.round(km * 5)));
+  } else {
+    fare = Math.max(10, Math.round(km * 2.45));
+    if (opts.student) fare = Math.max(5, Math.round(fare / 2));
+  }
+  const speed = isMetro ? 32 : (opts.peak ? 12 : 20);
+  const rideMin = km / speed * 60;
+  const waitMin = isMetro ? 4 : 8;
+  const slice = svc.stops.slice(Math.min(i, j), Math.max(i, j) + 1);
+  const ordered = i <= j ? slice : slice.reverse();
+  return {
+    service: svc.name, kind: svc.kind, type: svc.type,
+    board: ordered[0], alight: ordered[ordered.length - 1],
+    towards: i <= j ? svc.stops[svc.stops.length - 1] : svc.stops[0],
+    stops: ordered, segments: segs, km: Math.round(km * 10) / 10,
+    fare: fare, rideMin: rideMin, waitMin: waitMin, studentApplied: !isMetro && !!opts.student
+  };
 }
 
-/* ================= search ================= */
-function doSearch(){
-  const fromRaw = $('fromInput').value, toRaw = $('toInput').value;
-  const from = matchStop(fromRaw), to = matchStop(toRaw);
-  const box = $('results');
-  if(!from || !to){
-    const bad = !from ? fromRaw : toRaw;
-    const which = !from ? 'From' : 'To';
-    box.innerHTML = `<div class="no-result">⚠️ The ${which} place <strong>"${bad || ''}"</strong> is not in the stop list yet. Please pick a place from the suggestions while typing.</div>`;
-    return;
+/* if boarding service B after alighting service A at stop x, what is the board name on B? (null = no transfer) */
+function counterpart(a, b, x) {
+  if (a.kind !== 'metro' && b.kind !== 'metro') return b.stops.includes(x) ? x : null;
+  if (a.kind === 'bus' && b.kind === 'metro') {
+    if (!INTERCHANGE.has(x)) return null;
+    const st = x === 'Uttara' ? 'Uttara South' : x;
+    return b.stops.includes(st) ? st : null;
   }
-  if(from === to){
-    box.innerHTML = `<div class="no-result">⚠️ From and To are the same place — pick two different stops.</div>`;
-    return;
+  if (a.kind === 'metro' && b.kind === 'bus') {
+    const bs = x === 'Uttara South' ? 'Uttara' : x;
+    if (!INTERCHANGE.has(bs)) return null;
+    return b.stops.includes(bs) ? bs : null;
   }
-  const found = [];
-  BUSES.forEach(bus => {
-    const i = bus.stops.indexOf(from), j = bus.stops.indexOf(to);
-    if(i === -1 || j === -1) return;
-    const segments = Math.abs(j - i);
-    const slice = bus.stops.slice(Math.min(i,j), Math.max(i,j) + 1);
-    const segment = i < j ? slice : slice.reverse();
-    const towards = i < j ? bus.stops[bus.stops.length - 1] : bus.stops[0];
-    found.push({ bus, segments, segment, towards });
+  return b.stops.includes(x) ? x : null; // metro→metro (same service in practice)
+}
+
+function findJourneys(from, to, opts) {
+  opts = opts || { student: false, peak: false };
+  const directs = [], transfers = [];
+  for (const svc of SERVICES) {
+    const i = svc.stops.indexOf(from), j = svc.stops.indexOf(to);
+    if (i !== -1 && j !== -1 && i !== j) directs.push({ legs: [legMath(svc, i, j, opts)], transferAt: [] });
+  }
+  for (const A of SERVICES) {
+    const i0 = A.stops.indexOf(from);
+    if (i0 === -1) continue;
+    for (let xi = 0; xi < A.stops.length; xi++) {
+      if (xi === i0) continue;
+      const x = A.stops[xi];
+      for (const B of SERVICES) {
+        if (B === A) continue;
+        const bx = counterpart(A, B, x);
+        if (bx === null) continue;
+        const bi = B.stops.indexOf(bx), bj = B.stops.indexOf(to);
+        if (bi === -1 || bj === -1 || bi === bj) continue;
+        const legA = legMath(A, i0, xi, opts);
+        const legB = legMath(B, bi, bj, opts);
+        if (legA.segments === 0 || legB.segments === 0) continue;
+        transfers.push({ legs: [legA, legB], transferAt: [x] });
+      }
+    }
+  }
+  const finish = list => list.map(jn => {
+    const fare = jn.legs.reduce((a, l) => a + l.fare, 0);
+    const stops = jn.legs.reduce((a, l) => a + l.segments, 0);
+    const mins = jn.legs.reduce((a, l) => a + l.rideMin + l.waitMin, 0) + (jn.legs.length - 1) * 6;
+    return { legs: jn.legs, transferAt: jn.transferAt, totalFare: fare, totalStops: stops, totalMin: Math.round(mins), transfers: jn.legs.length - 1 };
   });
-  found.sort((a,b) => a.segments - b.segments);
-
-  if(found.length === 0){
-    box.innerHTML = `<div class="no-result">😕 No direct bus found from <strong>${from}</strong> to <strong>${to}</strong>. Try travelling to a common hub such as Farmgate, Gulistan, Motijheel or Mirpur 10 and changing buses there.</div>`;
-    return;
+  const rank = (a, b) => (a.legs.length - b.legs.length) || (a.totalStops - b.totalStops) || (a.totalFare - b.totalFare);
+  const d = finish(directs).sort(rank).slice(0, 3);
+  const seen = new Set(), rankedT = [];
+  for (const t of finish(transfers).sort(rank)) {
+    const key = t.legs[0].service + '|' + t.transferAt[0] + '|' + t.legs[1].service;
+    if (seen.has(key)) continue;
+    seen.add(key); rankedT.push(t);
   }
-  box.innerHTML = `<p style="margin-bottom:12px;"><strong>${found.length}</strong> direct bus${found.length>1?'es':''} from <strong>${from}</strong> to <strong>${to}</strong>:</p>` +
-    found.map(f => {
-      const { distanceKm, fare } = estimateFare(f.segments);
-      const segHtml = f.segment.map((s,idx) =>
-        (idx>0 ? `<span class="arrow">→</span>` : '') +
-        `<span class="stop${idx===0||idx===f.segment.length-1?' end':''}">${s}</span>`
-      ).join('');
-      return `<div class="result">
-        <div class="result-head">
-          <span class="bus-name">🚌 ${f.bus.name}</span>
-          <span>
-            <span class="badge">${f.segments} stop${f.segments>1?'s':''} · ~${distanceKm} km</span>
-            <span class="badge fare">Estimated fare: ৳${fare}</span>
-          </span>
-        </div>
-        <p class="direction">Direction: towards <strong>${f.towards}</strong> · ${f.segments - 1} stop${f.segments-1!==1?'s':''} in between</p>
-        <div class="segment">${segHtml}</div>
-      </div>`;
-    }).join('');
+  let tList = rankedT.slice(0, 5);
+  /* keep the metro visible: if a metro-combo transfer exists but none made the cut, swap it into the last slot */
+  const metroShown = d.concat(tList).some(j => j.legs.some(l => l.kind === 'metro'));
+  if (!metroShown) {
+    const mc = rankedT.find(t => t.legs.some(l => l.kind === 'metro'));
+    if (mc) { if (tList.length >= 5) tList[tList.length - 1] = mc; else tList.push(mc); }
+  }
+  const all = d.concat(tList).sort(rank);
+  if (all.length) {
+    const minFare = Math.min(...all.map(j => j.totalFare));
+    const minTime = Math.min(...all.map(j => j.totalMin));
+    all.forEach(j => { j.cheapest = j.totalFare === minFare; j.fastest = j.totalMin === minTime; });
+  }
+  return all;
 }
-$('searchBtn').addEventListener('click', doSearch);
-[$('fromInput'), $('toInput')].forEach(inp => inp.addEventListener('keydown', e => { if(e.key === 'Enter') doSearch(); }));
-$('swapBtn').addEventListener('click', () => {
-  const a = $('fromInput').value; $('fromInput').value = $('toInput').value; $('toInput').value = a;
+</script>
+<script>
+'use strict';
+/* =====================================================================
+   UI layer (browser only)
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('brf_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('brf_' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let lang = store.get('lang', 'en');
+let peak = store.get('peak', null);
+if (peak === null) { const h = new Date().getHours(); peak = (h >= 7 && h < 11) || (h >= 16 && h < 21); }
+let student = !!store.get('student', false);
+let lastJourneys = [], lastFrom = '', lastTo = '', userLoc = null, dotCounter = 0;
+
+const S = () => STRINGS[lang] || STRINGS.en;
+function fmtN(x) { return lang === 'bn' ? bnDigits(x) : String(x); }
+function stopName(en) { return lang === 'bn' ? (STOP_BN[en] || en) : en; }
+function fmtMoney(n) { return '৳' + fmtN(n); }
+function fmtTime(mins) {
+  const m = Math.max(1, Math.round(mins)), h = Math.floor(m / 60), r = m % 60;
+  if (lang === 'bn') return h > 0 ? '~' + bnDigits(h) + ' ঘণ্টা ' + bnDigits(String(r).padStart(2, '0')) + ' মিনিট' : '~' + bnDigits(r) + ' মিনিট';
+  return h > 0 ? '~' + h + ' h ' + String(r).padStart(2, '0') + ' min' : '~' + r + ' min';
+}
+function typeLabel(t) {
+  if (lang !== 'bn') return t;
+  return t === 'AC' ? 'এসি' : t === 'Metro' ? 'মেট্রো' : 'নন-এসি';
+}
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ---------- theme ---------- */
+function applyTheme(th) {
+  document.documentElement.setAttribute('data-theme', th);
+  $('themeBtn').textContent = th === 'dark' ? '☀️' : '🌙';
+  store.set('theme', th);
+}
+applyTheme(store.get('theme', 'light'));
+$('themeBtn').addEventListener('click', () => {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 });
 
-/* ================= bus directory ================= */
-let activeBus = null;
-function renderBusGrid(filter=''){
-  const grid = $('busGrid');
-  const list = BUSES.filter(b => b.name.toLowerCase().includes(filter.trim().toLowerCase()));
-  grid.innerHTML = list.length ? list.map(b =>
-    `<button class="bus-chip${activeBus===b.name?' active':''}" data-bus="${b.name}">
-       <span class="bname">🚌 ${b.name}</span>
-       <span class="bmeta">${b.stops[0]} → ${b.stops[b.stops.length-1]} · ${b.stops.length} stops</span>
-     </button>`).join('')
-    : `<p style="color:var(--muted);">No bus matches “${filter}”.</p>`;
-  grid.querySelectorAll('.bus-chip').forEach(chip =>
-    chip.addEventListener('click', () => showRoute(chip.dataset.bus)));
+/* ---------- splash ---------- */
+(function splash() {
+  const sp = $('splash');
+  const name = 'Dhaka Bus Route Finder';
+  $('splashName').innerHTML = name.split('').map((c, i) => '<span style="--i:' + i + '">' + (c === ' ' ? '&nbsp;' : esc(c)) + '</span>').join('');
+  const hide = () => { sp.classList.add('gone'); setTimeout(() => sp.remove(), 700); };
+  if (REDUCED) { setTimeout(hide, 60); return; }
+  setTimeout(hide, 1250);
+  sp.addEventListener('click', hide);
+})();
+
+/* ---------- datalist ---------- */
+$('stopList').innerHTML = ALL_STOPS.map(s => '<option value="' + esc(lang === 'bn' ? (STOP_BN[s] || s) : s) + '" data-en="' + esc(s) + '">').join('');
+function refreshDatalist() {
+  $('stopList').innerHTML = ALL_STOPS.map(s => '<option value="' + esc(lang === 'bn' ? (STOP_BN[s] || s) : s) + '">').join('');
 }
-function showRoute(name){
-  const bus = BUSES.find(b => b.name === name);
-  if(!bus) return;
-  activeBus = name;
-  renderBusGrid($('busFilter').value);
-  $('routeDetail').style.display = 'block';
-  $('routeTitle').textContent = '🚌 ' + bus.name;
-  $('routeEnds').textContent = `Full route: ${bus.stops[0]} → ${bus.stops[bus.stops.length-1]} (${bus.stops.length} stops)`;
-  $('routeTimeline').innerHTML = bus.stops.map((s,idx) =>
-    `<li class="${idx===0?'first':''} ${idx===bus.stops.length-1?'last':''}">${s}${
-      idx===0 ? '<span class="tlabel">Start</span>' : idx===bus.stops.length-1 ? '<span class="tlabel">End</span>' : ''
-    }</li>`).join('');
-  $('routeDetail').scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+/* ---------- stats counters ---------- */
+(function counters() {
+  const targets = { statBuses: BUSES.length, statStops: ALL_STOPS.length, statMetro: (METRO.stations || []).length };
+  const run = () => {
+    for (const id in targets) {
+      const el = $(id), target = targets[id];
+      if (REDUCED) { el.textContent = fmtN(target); continue; }
+      const t0 = performance.now(), dur = 1100;
+      const tick = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmtN(Math.round(target * e));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { run(); io.disconnect(); } }, { threshold: .3 });
+    io.observe($('statBuses'));
+  } else run();
+})();
+
+/* ---------- quick chips ---------- */
+const POPULAR = [['Mirpur 10', 'Motijheel'], ['Uttara', 'Gulistan'], ['Gabtoli', 'Motijheel'], ['Farmgate', 'Uttara'], ['Mirpur 1', 'Jatrabari']];
+function chipHTML(pair, cls) {
+  return '<button type="button" class="chip ' + (cls || '') + '" data-from="' + esc(pair[0]) + '" data-to="' + esc(pair[1]) + '">' +
+    esc(stopName(pair[0])) + ' <span class="arr">→</span> ' + esc(stopName(pair[1])) + '</button>';
 }
-$('busFilter').addEventListener('input', e => renderBusGrid(e.target.value));
-renderBusGrid();
+function renderChips() {
+  $('chipsPopular').innerHTML = POPULAR.map(p => chipHTML(p)).join('');
+  const favs = store.get('favs', []);
+  $('favGroup').hidden = favs.length === 0;
+  $('chipsFavs').innerHTML = favs.map(p => chipHTML(p, 'fav')).join('');
+  const rec = store.get('recent', []);
+  $('recentGroup').hidden = rec.length === 0;
+  $('chipsRecent').innerHTML = rec.map(p => chipHTML(p)).join('');
+  document.querySelectorAll('.chip[data-from]').forEach(ch => ch.addEventListener('click', () => {
+    $('fromInput').value = stopName(ch.dataset.from);
+    $('toInput').value = stopName(ch.dataset.to);
+    doSearch();
+  }));
+}
+function pushRecent(from, to) {
+  let rec = store.get('recent', []).filter(p => !(p[0] === from && p[1] === to));
+  rec.unshift([from, to]); store.set('recent', rec.slice(0, 6)); renderChips();
+}
+function isFav(from, to) { return store.get('favs', []).some(p => p[0] === from && p[1] === to); }
+function toggleFav(from, to) {
+  let favs = store.get('favs', []);
+  if (isFav(from, to)) favs = favs.filter(p => !(p[0] === from && p[1] === to));
+  else favs.unshift([from, to]);
+  store.set('favs', favs.slice(0, 10)); renderChips();
+  return isFav(from, to);
+}
+
+/* ---------- controls ---------- */
+$('swapBtn').addEventListener('click', () => {
+  const a = $('fromInput').value; $('fromInput').value = $('toInput').value; $('toInput').value = a;
+  $('swapBtn').classList.toggle('flipped');
+});
+function syncToggles() {
+  $('studentToggle').checked = student;
+  $('segPeak').classList.toggle('active', peak);
+  $('segOff').classList.toggle('active', !peak);
+}
+$('studentToggle').addEventListener('change', e => { student = e.target.checked; store.set('student', student); if (lastFrom) renderLast(false); });
+$('segPeak').addEventListener('click', () => { peak = true; store.set('peak', true); syncToggles(); if (lastFrom) renderLast(false); });
+$('segOff').addEventListener('click', () => { peak = false; store.set('peak', false); syncToggles(); if (lastFrom) renderLast(false); });
+syncToggles();
+
+$('nearBtn').addEventListener('click', () => {
+  const s = S();
+  if (!navigator.geolocation) { toast(s.geoNA); return; }
+  const btn = $('nearBtn'); btn.disabled = true;
+  btn.innerHTML = '📍 <span>' + esc(s.locating) + '</span>';
+  navigator.geolocation.getCurrentPosition(pos => {
+    btn.disabled = false; btn.innerHTML = '📍 <span>' + esc(s.nearMe) + '</span>';
+    userLoc = [pos.coords.latitude, pos.coords.longitude];
+    let best = null, bd = 1e9;
+    for (const name in COORDS) {
+      const c = COORDS[name], dLat = c[0] - userLoc[0], dLng = c[1] - userLoc[1];
+      const d = dLat * dLat + dLng * dLng;
+      if (d < bd) { bd = d; best = name; }
+    }
+    if (best) { $('fromInput').value = stopName(best); toast(s.nearestSet + stopName(best)); $('toInput').focus(); }
+  }, () => {
+    btn.disabled = false; btn.innerHTML = '📍 <span>' + esc(s.nearMe) + '</span>';
+    toast(s.geoErr);
+  }, { timeout: 9000, maximumAge: 60000 });
+});
+
+/* ---------- search + results ---------- */
+function showError(msg) { const e = $('searchError'); e.textContent = msg; e.classList.add('show'); }
+function hideError() { $('searchError').classList.remove('show'); }
+
+function doSearch() {
+  const s = S();
+  hideError();
+  const fromRaw = $('fromInput').value, toRaw = $('toInput').value;
+  const from = matchStop(fromRaw), to = matchStop(toRaw);
+  if (!from || !to) {
+    if (!fromRaw.trim() || !toRaw.trim()) { showError(s.errEmpty); return; }
+    const badField = !from ? (lang === 'bn' ? 'From' : 'From') : 'To';
+    const badVal = !from ? fromRaw : toRaw;
+    showError('⚠ ' + badField + ': "' + badVal + '" — ' + (lang === 'bn' ? 'এই জায়গাটি স্টপ লিস্টে নেই। টাইপ করার সময় সাজেশন থেকে বাছুন।' : 'this place is not in the stop list. Please pick from the suggestions while typing.'));
+    return;
+  }
+  if (from === to) { showError(s.errSame); return; }
+  const btn = $('searchBtn');
+  btn.disabled = true; btn.classList.add('loading');
+  $('searchBtnText').textContent = lang === 'bn' ? STRINGS.bn.search + '…' : 'Searching…';
+  const sec = $('resultsSection'); sec.classList.add('show');
+  $('resultsMeta').textContent = '';
+  $('resultsList').innerHTML = '<div class="skel-card"><div class="skel" style="width:55%"></div><div class="skel" style="width:88%"></div><div class="skel" style="width:70%"></div></div><div class="skel-card"><div class="skel" style="width:48%"></div><div class="skel" style="width:82%"></div><div class="skel" style="width:64%"></div></div>';
+  sec.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
+  setTimeout(() => {
+    btn.disabled = false; btn.classList.remove('loading');
+    $('searchBtnText').textContent = S().search;
+    lastFrom = from; lastTo = to;
+    lastJourneys = findJourneys(from, to, { student: student, peak: peak });
+    pushRecent(from, to);
+    renderResults();
+  }, REDUCED ? 30 : 450);
+}
+function renderLast(scroll) {
+  if (!lastFrom || !lastTo) return;
+  lastJourneys = findJourneys(lastFrom, lastTo, { student: student, peak: peak });
+  renderResults();
+  if (scroll) $('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+$('searchBtn').addEventListener('click', doSearch);
+[$('fromInput'), $('toInput')].forEach(inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } }));
+
+function legHTML(leg) {
+  const s = S();
+  const d1 = (dotCounter++) * 0.12, d2 = (dotCounter++) * 0.12;
+  const rideTxt = fmtN(leg.segments) + ' ' + (leg.segments === 1 ? s.stopWord : s.stopsWord) + ' · ' + fmtN(leg.km) + ' km · ' + fmtTime(leg.rideMin);
+  return '<div class="leg' + (leg.kind === 'metro' ? ' metro-leg' : '') + '">' +
+    '<div class="trow"><span class="tdot' + (leg.kind === 'metro' ? ' metro-dot' : '') + '" style="--d:' + d1.toFixed(2) + 's"></span>' +
+    '<div><div class="tname">' + esc(stopName(leg.board)) + '</div><div class="tsub">' + esc(s.boardAt) + '</div></div></div>' +
+    '<div class="leg-mid"><span class="veh">' + (leg.kind === 'metro' ? '🚇' : '🚌') + '</span>' +
+    '<span class="svc">' + esc(leg.kind === 'metro' ? (lang === 'bn' ? 'মেট্রো রেল (MRT-6)' : METRO_NAME) : leg.service) + '</span>' +
+    '<span class="type-chip' + (leg.kind === 'metro' ? ' metro' : '') + '">' + esc(typeLabel(leg.type)) + '</span>' +
+    '<span class="ride">' + esc(s.towards) + ' ' + esc(stopName(leg.towards)) + ' · ' + esc(rideTxt) + '</span>' +
+    '<span class="legfare">' + fmtMoney(leg.fare) + '<small>' + fmtTime(leg.rideMin + leg.waitMin) + (leg.studentApplied ? ' · ' + esc(s.studentTag) : '') + '</small></span></div>' +
+    '<div class="trow"><span class="tdot alight' + (leg.kind === 'metro' ? ' metro-dot' : '') + '" style="--d:' + d2.toFixed(2) + 's"></span>' +
+    '<div><div class="tname">' + esc(stopName(leg.alight)) + '</div><div class="tsub">' + esc(s.getDownAt) + '</div></div></div>' +
+    '</div>';
+}
+function journeyHTML(jn, idx) {
+  const s = S();
+  dotCounter = 0;
+  const hasMetro = jn.legs.some(l => l.kind === 'metro'), hasBus = jn.legs.some(l => l.kind === 'bus');
+  let badge;
+  if (jn.transfers === 0) badge = '<span class="badge' + (hasMetro ? ' metro' : '') + '">' + esc(hasMetro ? s.metro : s.direct) + '</span>';
+  else badge = '<span class="badge combo">' + esc(hasMetro && hasBus ? s.metroCombo : s.oneTransfer) + '</span>';
+  let ribbons = '';
+  if (jn.fastest) ribbons += '<span class="ribbon fast">⚡ ' + esc(s.fastest) + '</span>';
+  if (jn.cheapest) ribbons += '<span class="ribbon">★ ' + esc(s.cheapest) + '</span>';
+  let body = '';
+  jn.legs.forEach((leg, li) => {
+    body += legHTML(leg);
+    if (li < jn.legs.length - 1) {
+      body += '<div class="transfer" style="--d:' + (dotCounter * 0.12).toFixed(2) + 's"><span class="t-ic">⇄</span>' +
+        '<span class="t-txt">' + esc(s.changeHere) + ': ' + esc(stopName(jn.transferAt[li])) +
+        '<small>' + esc(s.transferWalk) + ' · +6 min</small></span></div>';
+    }
+  });
+  const fav = isFav(lastFrom, lastTo);
+  return '<article class="journey" style="--i:' + idx + '">' +
+    (ribbons ? '<div class="ribbons">' + ribbons + '</div>' : '') +
+    '<div class="j-head">' + badge +
+    '<span class="badge fare">' + esc(s.totalFare) + ': ' + fmtMoney(jn.totalFare) + '</span>' +
+    '<span class="badge time">⏱ ' + fmtTime(jn.totalMin) + '</span></div>' +
+    '<div class="legs">' + body + '</div>' +
+    '<div class="j-actions">' +
+    '<button type="button" data-act="map" data-idx="' + idx + '">' + esc(s.mapBtn) + '</button>' +
+    '<button type="button" data-act="save" data-idx="' + idx + '" class="' + (fav ? 'saved' : '') + '">' + esc(fav ? s.savedBtn : s.saveBtn) + '</button>' +
+    '<button type="button" data-act="share" data-idx="' + idx + '">' + esc(s.shareBtn) + '</button>' +
+    '</div></article>';
+}
+function renderResults() {
+  const s = S();
+  const sec = $('resultsSection'); sec.classList.add('show');
+  $('resultsMeta').innerHTML = esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo)) +
+    '<span class="muted">' + fmtN(lastJourneys.length) + ' ' + esc(s.resultsWord) + ' · ' + esc(peak ? s.peak : s.offpeak) + (student ? ' · ' + esc(s.student) : '') + '</span>';
+  if (!lastJourneys.length) {
+    $('resultsList').innerHTML = '<div class="no-result">😕 ' + esc(s.noRoute) + '</div>';
+    return;
+  }
+  $('resultsList').innerHTML = lastJourneys.map((jn, i) => journeyHTML(jn, i)).join('');
+  $('resultsList').querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', () => {
+    const jn = lastJourneys[+b.dataset.idx];
+    if (b.dataset.act === 'map') showMap(jn);
+    else if (b.dataset.act === 'save') { const now = toggleFav(lastFrom, lastTo); b.classList.toggle('saved', now); b.textContent = now ? S().savedBtn : S().saveBtn; }
+    else if (b.dataset.act === 'share') shareJourney(jn);
+  }));
+}
+function shareJourney(jn) {
+  const s = S();
+  const legsTxt = jn.legs.map(l => (l.kind === 'metro' ? 'Metro Rail (MRT-6)' : l.service) + ': ' + stopName(l.board) + ' → ' + stopName(l.alight)).join('  |  ');
+  const text = s.shareTextIntro + '\n' + stopName(lastFrom) + ' → ' + stopName(lastTo) + '\n' + legsTxt +
+    '\n' + s.totalFare + ': ' + fmtMoney(jn.totalFare) + ' · ' + fmtTime(jn.totalMin) + '\nhttps://nafiz-xd.github.io/bus-route-finder/';
+  shareText(text);
+}
+function shareText(text) {
+  const s = S();
+  if (navigator.share) { navigator.share({ text: text }).then(() => toast(s.sharedOk)).catch(() => {}); }
+  else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => toast(s.copied)).catch(() => toast(text)); }
+  else toast(s.copied);
+}
+</script>
+<script>
+'use strict';
+/* =====================================================================
+   Map, directory, stop board, metro, report, i18n, PWA
+   ===================================================================== */
+let mapObj = null, mapLayers = null;
+function showMap(jn) {
+  const s = S();
+  const panel = $('mapPanel');
+  panel.classList.add('show');
+  $('mapTitle').textContent = s.routeMap + ': ' + stopName(lastFrom) + ' → ' + stopName(lastTo);
+  setTimeout(() => panel.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }), 40);
+  if (typeof L === 'undefined') {
+    $('map').innerHTML = '<div class="map-fallback">' + esc(s.mapFail) + '</div>';
+    return;
+  }
+  if (!mapObj) {
+    mapObj = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(mapObj);
+    mapLayers = L.layerGroup().addTo(mapObj);
+  }
+  setTimeout(() => { mapObj.invalidateSize(); drawJourney(jn); }, 80);
+}
+function drawJourney(jn) {
+  mapLayers.clearLayers();
+  const pts = [];
+  jn.legs.forEach(leg => {
+    leg.stops.forEach(st => {
+      const c = COORDS[st];
+      if (!c) return; // station without coordinates — skip gracefully
+      pts.push(c);
+      const isEnd = st === leg.board || st === leg.alight;
+      L.circleMarker(c, {
+        radius: isEnd ? 8 : 4.5, color: '#0a5c2e', weight: 2,
+        fillColor: leg.kind === 'metro' ? '#6a5acd' : (isEnd ? '#f5a623' : '#0e7a3d'), fillOpacity: .95
+      }).addTo(mapLayers).bindPopup('<b>' + esc(stopName(st)) + '</b>');
+    });
+  });
+  const line = pts.filter((p, i) => i === 0 || p[0] !== pts[i - 1][0] || p[1] !== pts[i - 1][1]);
+  if (line.length > 1) L.polyline(line, { color: '#0e7a3d', weight: 5, opacity: .85, className: 'route-line' }).addTo(mapLayers);
+  if (userLoc) L.marker(userLoc).addTo(mapLayers).bindPopup(esc(S().youAreHere));
+  if (line.length) mapObj.fitBounds(L.latLngBounds(line).pad(0.12));
+}
+$('mapClose').addEventListener('click', () => $('mapPanel').classList.remove('show'));
+
+/* ---------- bus directory ---------- */
+function renderDirectory(filter) {
+  const s = S();
+  const q = (filter || '').trim().toLowerCase();
+  const list = BUSES.filter(b => !q || b.name.toLowerCase().includes(q));
+  $('busList').innerHTML = list.length ? list.map(b => {
+    const stops = b.stops.map((st, i) => (i ? '<span class="arrw">→</span>' : '') + '<span class="stp"><i></i>' + esc(stopName(st)) + '</span>').join('');
+    return '<div class="bus-row"><button type="button" class="bus-head">' +
+      '<span style="font-size:19px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
+      '<span class="broute">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + ' · ' + fmtN(b.stops.length) + ' ' + esc(s.stopsWord) + '</span></span>' +
+      '<span class="type-chip">' + esc(typeLabel(b.type)) + '</span><span class="chev">▾</span></button>' +
+      '<div class="bus-detail"><div class="bus-detail-in">' +
+      '<div class="info-chips"><span>🕐 ' + esc(s.firstBus) + ': ' + esc(fmtN(b.first || '')) + '</span><span>🕙 ' + esc(s.lastBus) + ': ' + esc(fmtN(b.last || '')) + '</span><span>⏱ ' + esc(s.every) + ' ' + esc(fmtN(b.freq || '')) + '</span></div>' +
+      '<div class="stop-strip">' + stops + '</div>' +
+      '</div></div></div>';
+  }).join('') : '<div class="no-result">😕 ' + esc(s.noBusVia) + '</div>';
+  $('busList').querySelectorAll('.bus-head').forEach(h => h.addEventListener('click', () => {
+    const row = h.parentElement, det = row.querySelector('.bus-detail');
+    const open = row.classList.toggle('open');
+    det.style.maxHeight = open ? det.scrollHeight + 'px' : '0px';
+  }));
+}
+$('busFilter').addEventListener('input', e => renderDirectory(e.target.value));
+
+/* ---------- stop board ---------- */
+let boardStop = null;
+function renderBoard() {
+  const s = S();
+  if (!boardStop) return;
+  const rows = BUSES.filter(b => b.stops.includes(boardStop));
+  if (!rows.length) {
+    $('stopBoardList').innerHTML = '<p style="color:var(--muted);font-weight:600">' + esc(s.noBusVia) + '</p>';
+    return;
+  }
+  $('stopBoardList').innerHTML = '<p style="font-weight:700;margin-bottom:4px">' + esc(stopName(boardStop)) + ' — ' + fmtN(rows.length) + ' ' + esc(s.busesVia) + '</p>' +
+    rows.map(b => {
+      const idx = b.stops.indexOf(boardStop);
+      return '<div class="brow"><span style="font-size:18px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
+        '<div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span>' +
+        '<span class="pos">' + esc(s.stopWord) + ' ' + fmtN(idx + 1) + '/' + fmtN(b.stops.length) + '</span></div>';
+    }).join('');
+}
+function boardFromInput() {
+  const m = matchStop($('stopInput').value);
+  if (m) { boardStop = m; renderBoard(); }
+}
+$('stopInput').addEventListener('change', boardFromInput);
+$('stopInput').addEventListener('input', () => {
+  const v = $('stopInput').value.trim(), m = matchStop(v);
+  if (m && (v === m || v === (STOP_BN[m] || ''))) { boardStop = m; renderBoard(); }
+});
+
+/* ---------- metro timeline ---------- */
+function renderMetro() {
+  const inter = new Set((METRO.interchange || []).map(x => x === 'Uttara' ? 'Uttara South' : x));
+  $('metroTimeline').innerHTML = (METRO.stations || []).map(st => {
+    const isInter = inter.has(st);
+    return '<div class="mstation' + (isInter ? ' inter' : '') + '"><span class="mdot"></span><span class="mname">' + esc(stopName(st)) + '</span>' +
+      (isInter ? '<span class="itag">🚌 ' + esc(S().interchange) + '</span>' : '') + '</div>';
+  }).join('');
+}
+
+/* ---------- report & suggest ---------- */
+function renderReports() {
+  const s = S();
+  const reps = store.get('reports', []);
+  $('myReports').hidden = reps.length === 0;
+  $('reportList').innerHTML = reps.map(r =>
+    '<div class="rep-item"><b>' + esc(s.repTypeNames[r.type] || r.type) + '</b> — ' + esc(r.details) +
+    (r.name ? '<small>— ' + esc(r.name) + '</small>' : '') +
+    '<small>' + esc(fmtN(new Date(r.ts).toLocaleString())) + '</small></div>').join('');
+}
+$('reportForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const s = S();
+  const details = $('reportDetails').value.trim();
+  if (!details) { toast(s.reportEmpty); $('reportDetails').focus(); return; }
+  const rep = { type: $('reportType').value, details: details, name: $('reportName').value.trim(), ts: Date.now() };
+  const reps = store.get('reports', []);
+  reps.unshift(rep);
+  store.set('reports', reps.slice(0, 20));
+  renderReports();
+  const msg = $('reportMsg');
+  msg.innerHTML = esc(s.reportThanks) + '<br><button type="button" id="shareReportBtn">' + esc(s.shareReport) + '</button>';
+  msg.classList.add('show');
+  $('shareReportBtn').addEventListener('click', () => shareText(s.shareTextIntro + ' — ' + (s.repTypeNames[rep.type] || rep.type) + ': ' + rep.details));
+  $('reportDetails').value = '';
+});
+
+/* ---------- language ---------- */
+function applyLang(skipStats) {
+  const s = S();
+  document.documentElement.lang = lang === 'bn' ? 'bn' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (s[k]) el.textContent = s[k]; });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.getAttribute('data-i18n-ph'); if (s[k]) el.setAttribute('placeholder', s[k]); });
+  $('langBtn').textContent = lang === 'bn' ? 'EN' : 'বাং';
+  refreshDatalist();
+  if (!skipStats) {
+    $('statBuses').textContent = fmtN(BUSES.length);
+    $('statStops').textContent = fmtN(ALL_STOPS.length);
+    $('statMetro').textContent = fmtN((METRO.stations || []).length);
+  }
+  renderChips();
+  renderDirectory($('busFilter').value);
+  renderMetro();
+  renderReports();
+  if (boardStop) renderBoard();
+  if (lastFrom) renderResults();
+}
+$('langBtn').addEventListener('click', () => {
+  lang = lang === 'bn' ? 'en' : 'bn';
+  store.set('lang', lang);
+  applyLang(false);
+});
+
+/* ---------- scroll reveal ---------- */
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); }
+  }), { threshold: .07 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('vis'));
+}
+
+/* ---------- PWA ---------- */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('installBtn').classList.add('show');
+});
+$('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  try { await deferredPrompt.userChoice; } catch (e) {}
+  deferredPrompt = null;
+  $('installBtn').classList.remove('show');
+});
+window.addEventListener('appinstalled', () => $('installBtn').classList.remove('show'));
+
+/* ---------- init ---------- */
+renderChips();
+renderDirectory('');
+renderMetro();
+renderReports();
+if (lang === 'bn') applyLang(true);
 </script>
 </body>
 </html>
