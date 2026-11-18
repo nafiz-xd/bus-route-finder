@@ -137,18 +137,18 @@ body:not([data-view="home"]) #stickyBar{display:none!important}
 .switch.sm input:checked + .track::after{transform:translateX(17px)}
 .sb-student{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
 #reportShot{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.shot-box{display:flex;align-items:center;gap:13px;background:var(--surface2);border:1.8px dashed color-mix(in srgb,var(--green) 55%,var(--border));border-radius:16px;padding:15px 16px;cursor:pointer}
-.shot-box .ic{width:44px;height:44px;flex:none;border-radius:12px;background:var(--green-light);display:flex;align-items:center;justify-content:center;color:var(--green)}
-[data-theme="dark"] .shot-box .ic{color:#8fe3ae}
-.shot-box .thumb{width:44px;height:44px;border-radius:12px;object-fit:cover;flex:none;display:none}
-.shot-box .tx{flex:1;min-width:0}
-.shot-box .t1{display:block;font-weight:700;font-size:16px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shot-box .t2{display:block;font-size:13px;color:var(--muted);margin-top:2px}
-.shot-box .pill{flex:none;background:var(--green);color:#fff;font-weight:700;font-size:13.5px;padding:8px 15px;border-radius:99px}
-.shot-box.has{border-style:solid;border-color:var(--green);background:var(--green-light)}
-.shot-box.has .ic{display:none}
-.shot-box.has .thumb{display:block}
-.shot-box.has .pill{background:var(--surface);color:var(--green)}
+.report-card .shot-box{display:flex;align-items:center;gap:13px;background:var(--surface2);border:1.8px dashed color-mix(in srgb,var(--green) 55%,var(--border));border-radius:16px;padding:15px 16px;cursor:pointer}
+.report-card .shot-box .ic{width:44px;height:44px;flex:none;border-radius:12px;background:var(--green-light);display:flex;align-items:center;justify-content:center;color:var(--green)}
+[data-theme="dark"] .report-card .shot-box .ic{color:#8fe3ae}
+.report-card .shot-box .thumb{width:44px;height:44px;border-radius:12px;object-fit:cover;flex:none;display:none}
+.report-card .shot-box .tx{flex:1;min-width:0}
+.report-card .shot-box .t1{display:block;font-weight:700;font-size:16px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.report-card .shot-box .t2{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.report-card .shot-box .pill{flex:none;background:var(--green);color:#fff;font-weight:700;font-size:13.5px;padding:8px 15px;border-radius:99px}
+.report-card .shot-box.has{border-style:solid;border-color:var(--green);background:var(--green-light)}
+.report-card .shot-box.has .ic{display:none}
+.report-card .shot-box.has .thumb{display:block}
+.report-card .shot-box.has .pill{background:var(--surface);color:var(--green)}
 .swap-row{display:flex;justify-content:center;padding:1px 6px}
 #swapBtn{width:40px;height:40px;border-radius:50%;border:2px solid var(--green);background:var(--surface);color:var(--green);font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .5s cubic-bezier(.55,-0.3,.3,1.35),background .3s;box-shadow:var(--shadow-sm)}
 #swapBtn{position:absolute;left:50%;top:120px;margin:-22px 0 0 -22px;z-index:6;box-shadow:0 5px 16px rgba(0,0,0,.22)}
