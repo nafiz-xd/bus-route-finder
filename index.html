@@ -117,6 +117,8 @@ main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
 #stickyBar{display:none;position:fixed;top:63px;left:8px;right:8px;max-width:760px;margin:0 auto;z-index:850;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:16px;padding:10px 12px;box-shadow:0 12px 28px rgba(0,0,0,.18)}
 #resultsSection{scroll-margin-top:208px}
 #stickyBar.show{display:block}
+#stickyBar{transition:opacity .25s ease,transform .25s ease,visibility .25s}
+#stickyBar:not(.vis){opacity:0;visibility:hidden;transform:translateY(-10px);pointer-events:none}
 .sec-nav{display:none}
 body{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
 body:not([data-view="home"]) #stickyBar{display:none!important}
@@ -134,6 +136,10 @@ body:not([data-view="home"]) #stickyBar{display:none!important}
 .switch.sm .track::after{width:17px;height:17px}
 .switch.sm input:checked + .track::after{transform:translateX(17px)}
 .sb-student{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700}
+#shotPreview{display:flex;align-items:center;gap:10px;margin-top:8px}
+#shotPreview[hidden]{display:none}
+#shotImg{width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+#shotName{font-size:12.5px;color:var(--muted);word-break:break-all}
 .swap-row{display:flex;justify-content:center;padding:1px 6px}
 #swapBtn{width:40px;height:40px;border-radius:50%;border:2px solid var(--green);background:var(--surface);color:var(--green);font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .5s cubic-bezier(.55,-0.3,.3,1.35),background .3s;box-shadow:var(--shadow-sm)}
 #swapBtn{position:absolute;left:50%;top:120px;margin:-22px 0 0 -22px;z-index:6;box-shadow:0 5px 16px rgba(0,0,0,.22)}
@@ -619,7 +625,12 @@ footer b{color:var(--text)}
   <section class="block reveal" id="reportSection">
     <div class="sec-head"><h3>✍️ <span data-i18n="reportTitle">Report &amp; Suggest</span></h3><span class="sub" data-i18n="reportSub">Help keep the data right</span></div>
     <div class="card report-card">
-      <form id="reportForm">
+      <form id="reportForm" action="https://formsubmit.co/nafiz7572@gmail.com" method="POST" enctype="multipart/form-data" target="reportSink">
+        <input type="hidden" name="_subject" id="repSubject" value="Bus Finder report">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="report_type" id="repTypeHidden" value="">
+        <input type="hidden" name="email" id="repEmailHidden" value="">
         <label for="reportType" data-i18n="reportType">Report type</label>
         <select id="reportType">
           <option value="wrong" data-i18n="rtWrong">Wrong route info</option>
@@ -628,13 +639,17 @@ footer b{color:var(--text)}
           <option value="other" data-i18n="rtOther">Other</option>
         </select>
         <label for="reportDetails" data-i18n="reportDetails">Details</label>
-        <textarea id="reportDetails" data-i18n-ph="reportDetailsPh" placeholder="Tell us what is wrong or missing…"></textarea>
+        <textarea id="reportDetails" name="details" data-i18n-ph="reportDetailsPh" placeholder="Tell us what is wrong or missing…"></textarea>
         <label for="reportName" data-i18n="reportName">Your name (optional)</label>
-        <input type="text" id="reportName" data-i18n-ph="reportNamePh" placeholder="e.g. Rahim">
+        <input type="text" id="reportName" name="name" data-i18n-ph="reportNamePh" placeholder="e.g. Rahim">
         <label for="reportContact" data-i18n="reportContact">Email or mobile (optional)</label>
-        <input type="text" id="reportContact" data-i18n-ph="reportContactPh" placeholder="e.g. you@mail.com or 01XXXXXXXXX">
+        <input type="text" id="reportContact" name="contact" data-i18n-ph="reportContactPh" placeholder="e.g. you@mail.com or 01XXXXXXXXX">
+        <label for="reportShot" data-i18n="reportShot">Add a screenshot (optional)</label>
+        <input type="file" id="reportShot" name="attachment" accept="image/*">
+        <div id="shotPreview" hidden><img id="shotImg" alt=""><span id="shotName"></span></div>
         <button id="reportSubmit" type="submit" data-i18n="reportSubmit">Submit report</button>
       </form>
+      <iframe name="reportSink" id="reportSink" title="" style="display:none"></iframe>
       <div id="reportMsg"></div>
       <p class="report-note" data-i18n="reportNote">Reports are saved on this device. Sharing your report helps us fix the data for everyone — thank you!</p>
       <div class="myrep" id="myReports" hidden>
@@ -710,7 +725,7 @@ const STRINGS = {
     reportDetails: 'Details', reportDetailsPh: 'Tell us what is wrong or missing…',
     reportName: 'Your name (optional)', reportNamePh: 'e.g. Rahim', reportSubmit: 'Submit report',
     reportNote: 'Reports are emailed straight to the app team and also saved on this device — thank you!',
-    reportSending: 'Sending…', reportOffline: 'No internet — the report was saved on this device only. Please send it again when you are back online.',
+    reportShot: 'Add a screenshot (optional)', reportShotBig: 'That screenshot is too large — the report was sent without it.', reportSending: 'Sending…', reportOffline: 'No internet — the report was saved on this device only. Please send it again when you are back online.',
     myReports: 'My reports on this device', shareReport: 'Share report',
     disclaimer: 'Route data is community-maintained and approximate — please verify before travelling.', madeBy: 'Made by',
     direct: 'Direct', oneTransfer: '1 Transfer', metroCombo: 'Metro combo', metro: 'Metro',
@@ -758,7 +773,7 @@ const STRINGS = {
     reportDetails: 'বিস্তারিত', reportDetailsPh: 'কী ভুল বা কী নেই, লিখুন…',
     reportName: 'আপনার নাম (ঐচ্ছিক)', reportNamePh: 'যেমন: রহিম', reportSubmit: 'রিপোর্ট জমা দিন',
     reportNote: 'রিপোর্ট সরাসরি অ্যাপ টিমের কাছে ইমেইলে পৌঁছে যায়, আর এই ডিভাইসেও সেভ থাকে — ধন্যবাদ!',
-    reportSending: 'পাঠানো হচ্ছে…', reportOffline: 'ইন্টারনেট নেই — রিপোর্ট শুধু এই ডিভাইসে সেভ হয়েছে। অনলাইনে এলে আবার পাঠানোর চেষ্টা করুন।',
+    reportShot: 'স্ক্রিনশট যোগ করুন (ঐচ্ছিক)', reportShotBig: 'স্ক্রিনশটটা অনেক বড় — রিপোর্টটা ওটা ছাড়াই পাঠানো হয়েছে।', reportSending: 'পাঠানো হচ্ছে…', reportOffline: 'ইন্টারনেট নেই — রিপোর্ট শুধু এই ডিভাইসে সেভ হয়েছে। অনলাইনে এলে আবার পাঠানোর চেষ্টা করুন।',
     myReports: 'এই ডিভাইসে আমার রিপোর্ট', shareReport: 'রিপোর্ট শেয়ার করুন',
     disclaimer: 'রুটের তথ্য কমিউনিটি-রক্ষিত ও আনুমানিক — যাত্রার আগে যাচাই করে নিন।', madeBy: 'তৈরি করেছেন',
     direct: 'সরাসরি', oneTransfer: '১ বার বদলি', metroCombo: 'মেট্রো কম্বো', metro: 'মেট্রো',
@@ -1089,6 +1104,7 @@ $('resetBtn').addEventListener('click', () => {
   $('mapPanel').classList.remove('show');
   $('resultsSection').classList.remove('show');
   $('stickyBar').classList.remove('show');
+  $('stickyBar').classList.remove('vis');
   lastFrom = null; lastTo = null; lastJourneys = [];
   const se = $('searchEmpty'); if (se) se.style.display = '';
   document.querySelector('.search-card').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
@@ -1236,6 +1252,8 @@ function renderResults() {
   const s = S();
   const sec = $('resultsSection'); sec.classList.add('show');
   $('sbRoute').textContent = stopName(lastFrom) + ' → ' + stopName(lastTo);
+  requestAnimationFrame(updateBarVis);
+  let bn = 0; const biv = setInterval(() => { updateBarVis(); if (++bn > 7) clearInterval(biv); }, 180);
   $('resultsMeta').innerHTML = esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo)) +
     '<span class="muted">' + fmtN(lastJourneys.length) + ' ' + esc(s.resultsWord) + ' · ' + esc(peak ? s.peak : s.offpeak) + (student ? ' · ' + esc(s.student) : '') + '</span>';
   if (!lastJourneys.length) {
@@ -1632,30 +1650,56 @@ function renderReports() {
     '<small>' + esc(fmtN(new Date(r.ts).toLocaleString())) + '</small></div>').join('');
 }
 $('reportForm').addEventListener('submit', e => {
-  e.preventDefault();
   const s = S();
   const details = $('reportDetails').value.trim();
-  if (!details) { toast(s.reportEmpty); $('reportDetails').focus(); return; }
+  if (!details) { e.preventDefault(); toast(s.reportEmpty); $('reportDetails').focus(); return; }
   const rep = { type: $('reportType').value, details: details, name: $('reportName').value.trim(), contact: $('reportContact').value.trim(), ts: Date.now() };
   const reps = store.get('reports', []);
   reps.unshift(rep);
   store.set('reports', reps.slice(0, 20));
   renderReports();
+  const typeEn = (STRINGS.en.repTypeNames[rep.type] || rep.type);
+  $('repSubject').value = 'Bus Finder report: ' + typeEn;
+  $('repTypeHidden').value = typeEn;
+  $('repEmailHidden').value = (rep.contact && rep.contact.includes('@')) ? rep.contact : '';
+  const shot = $('reportShot');
+  let shotDropped = false;
+  if (shot.files && shot.files[0] && shot.files[0].size > 9 * 1024 * 1024) { shot.value = ''; shotDropped = true; $('shotPreview').hidden = true; }
+  window.__repShotDropped = shotDropped;
+  const msg = $('reportMsg');
+  msg.textContent = s.reportSending + (shotDropped ? ' ' + s.reportShotBig : '');
+  msg.classList.add('show');
+  window.__repPending = rep;
+  clearTimeout(window.__repTimer);
+  window.__repTimer = setTimeout(() => { if (window.__repPending) { window.__repPending = null; showReportDone(false); } }, 14000);
+});
+
+function showReportDone(sent) {
+  const s = S();
+  const rep = window.__repLast || {};
   $('reportDetails').value = '';
   $('reportContact').value = '';
+  $('reportShot').value = '';
+  $('shotPreview').hidden = true;
   const msg = $('reportMsg');
-  msg.textContent = s.reportSending;
+  msg.innerHTML = esc(sent ? s.reportThanks : s.reportOffline) + (window.__repShotDropped ? '<br>' + esc(s.reportShotBig) : '') + '<br><button type="button" id="shareReportBtn">' + esc(s.shareReport) + '</button>';
+  window.__repShotDropped = false;
   msg.classList.add('show');
-  const typeEn = (STRINGS.en.repTypeNames[rep.type] || rep.type);
-  const payload = { _subject: 'Bus Finder report: ' + typeEn, _template: 'table', _captcha: 'false', type: typeEn, details: rep.details, name: rep.name || '-', contact: rep.contact || '-' };
-  if (rep.contact && rep.contact.includes('@')) payload.email = rep.contact;
-  const showMsg = sent => {
-    msg.innerHTML = esc(sent ? s.reportThanks : s.reportOffline) + '<br><button type="button" id="shareReportBtn">' + esc(s.shareReport) + '</button>';
-    $('shareReportBtn').addEventListener('click', () => shareText(s.shareTextIntro + ' — ' + (s.repTypeNames[rep.type] || rep.type) + ': ' + rep.details));
-  };
-  fetch('https://formsubmit.co/ajax/nafiz7572@gmail.com', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) })
-    .then(r => r.json()).then(j => showMsg(!!(j && (j.success === true || j.success === 'true'))))
-    .catch(() => showMsg(false));
+  $('shareReportBtn').addEventListener('click', () => shareText(s.shareTextIntro + ' — ' + (s.repTypeNames[rep.type] || rep.type) + ': ' + (rep.details || '')));
+}
+$('reportSink').addEventListener('load', () => {
+  if (!window.__repPending) return;
+  window.__repLast = window.__repPending;
+  window.__repPending = null;
+  clearTimeout(window.__repTimer);
+  showReportDone(true);
+});
+$('reportShot').addEventListener('change', () => {
+  const f = $('reportShot').files && $('reportShot').files[0];
+  if (!f) { $('shotPreview').hidden = true; return; }
+  $('shotImg').src = URL.createObjectURL(f);
+  $('shotName').textContent = f.name;
+  $('shotPreview').hidden = false;
 });
 
 /* ---------- language ---------- */
@@ -1714,6 +1758,20 @@ $('installBtn').addEventListener('click', async () => {
 });
 window.addEventListener('appinstalled', () => $('installBtn').classList.remove('show'));
 
+/* ---------- sticky bar visibility: only while results are on screen ---------- */
+let barTick = false;
+function updateBarVis() {
+  const bar = $('stickyBar');
+  if (!bar || !bar.classList.contains('show')) return;
+  const r = $('resultsSection').getBoundingClientRect();
+  bar.classList.toggle('vis', r.top < window.innerHeight - 40);
+}
+const barScrollPing = () => { updateBarVis(); clearTimeout(window.__barT); window.__barT = setTimeout(updateBarVis, 90); };
+window.addEventListener('scroll', barScrollPing, { passive: true });
+window.addEventListener('wheel', barScrollPing, { passive: true });
+window.addEventListener('touchmove', barScrollPing, { passive: true });
+window.addEventListener('resize', updateBarVis);
+
 /* ---------- tab views ---------- */
 const VIEW_ELS = {
   home: [document.querySelector('.hero'), document.querySelector('.search-card'), document.querySelector('.chip-groups'), $('searchEmpty'), $('resultsSection'), $('mapPanel'), $('livePanel')],
@@ -1729,6 +1787,7 @@ function switchView(v) {
   for (const name in VIEW_ELS) VIEW_ELS[name].forEach(el => { if (el) el.style.display = name === v ? '' : 'none'; });
   document.querySelectorAll('#tabbar button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   window.scrollTo({ top: 0, behavior: 'auto' });
+  requestAnimationFrame(updateBarVis);
 }
 document.querySelectorAll('#tabbar button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
 switchView('home');
