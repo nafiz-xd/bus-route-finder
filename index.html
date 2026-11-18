@@ -709,7 +709,8 @@ const STRINGS = {
     rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
     reportDetails: 'Details', reportDetailsPh: 'Tell us what is wrong or missing…',
     reportName: 'Your name (optional)', reportNamePh: 'e.g. Rahim', reportSubmit: 'Submit report',
-    reportNote: 'Reports are saved on this device. Sharing your report helps us fix the data for everyone — thank you!',
+    reportNote: 'Reports are emailed straight to the app team and also saved on this device — thank you!',
+    reportSending: 'Sending…', reportOffline: 'No internet — the report was saved on this device only. Please send it again when you are back online.',
     myReports: 'My reports on this device', shareReport: 'Share report',
     disclaimer: 'Route data is community-maintained and approximate — please verify before travelling.', madeBy: 'Made by',
     direct: 'Direct', oneTransfer: '1 Transfer', metroCombo: 'Metro combo', metro: 'Metro',
@@ -721,7 +722,7 @@ const STRINGS = {
     resultsWord: 'route options', noRoute: 'No route found between these two stops yet. Try a nearby stop, or report the missing connection below.',
     errEmpty: 'Please enter both a From and a To stop.', errSame: 'From and To are the same place — pick two different stops.',
     firstBus: 'First', lastBus: 'Last', every: 'Every', busesVia: 'buses pass this stop', noBusVia: 'No bus found for this stop yet.',
-    reportThanks: 'Thanks! Your report was saved on this device.', reportEmpty: 'Please write a few details first.',
+    reportThanks: 'Thanks! Your report was sent to the app team.', reportEmpty: 'Please write a few details first.',
     copied: 'Copied to clipboard', sharedOk: 'Shared — thank you!', nearestSet: 'Nearest stop set: ',
     geoErr: 'Could not get a GPS fix. Please try again, or type your stop name instead.', geoNA: 'Location is not available on this device.',
     geoDenied: 'Location permission is blocked. If you opened this inside Facebook or Telegram, open the site in Safari instead and allow location when asked.',
@@ -756,7 +757,8 @@ const STRINGS = {
     rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
     reportDetails: 'বিস্তারিত', reportDetailsPh: 'কী ভুল বা কী নেই, লিখুন…',
     reportName: 'আপনার নাম (ঐচ্ছিক)', reportNamePh: 'যেমন: রহিম', reportSubmit: 'রিপোর্ট জমা দিন',
-    reportNote: 'রিপোর্ট এই ডিভাইসেই সেভ থাকে। রিপোর্ট শেয়ার করলে সবার জন্য তথ্য ঠিক করতে সাহায্য হয় — ধন্যবাদ!',
+    reportNote: 'রিপোর্ট সরাসরি অ্যাপ টিমের কাছে ইমেইলে পৌঁছে যায়, আর এই ডিভাইসেও সেভ থাকে — ধন্যবাদ!',
+    reportSending: 'পাঠানো হচ্ছে…', reportOffline: 'ইন্টারনেট নেই — রিপোর্ট শুধু এই ডিভাইসে সেভ হয়েছে। অনলাইনে এলে আবার পাঠানোর চেষ্টা করুন।',
     myReports: 'এই ডিভাইসে আমার রিপোর্ট', shareReport: 'রিপোর্ট শেয়ার করুন',
     disclaimer: 'রুটের তথ্য কমিউনিটি-রক্ষিত ও আনুমানিক — যাত্রার আগে যাচাই করে নিন।', madeBy: 'তৈরি করেছেন',
     direct: 'সরাসরি', oneTransfer: '১ বার বদলি', metroCombo: 'মেট্রো কম্বো', metro: 'মেট্রো',
@@ -768,7 +770,7 @@ const STRINGS = {
     resultsWord: 'রুট অপশন', noRoute: 'এই দুই স্টপের মধ্যে এখনো কোনো রুট পাওয়া যায়নি। কাছের অন্য স্টপ চেষ্টা করুন, অথবা নিচে রিপোর্ট করে জানান।',
     errEmpty: 'যাত্রা শুরু আর গন্তব্য — দুটো জায়গাই লিখুন।', errSame: 'যাত্রা শুরু আর গন্তব্য একই জায়গা — দুটি আলাদা স্টপ বাছুন।',
     firstBus: 'প্রথম', lastBus: 'শেষ', every: 'প্রতি', busesVia: 'টি বাস এই স্টপ দিয়ে যায়', noBusVia: 'এই স্টপের জন্য এখনো কোনো বাস পাওয়া যায়নি।',
-    reportThanks: 'ধন্যবাদ! আপনার রিপোর্ট এই ডিভাইসে সেভ হয়েছে।', reportEmpty: 'আগে কিছু বিস্তারিত লিখুন।',
+    reportThanks: 'ধন্যবাদ! আপনার রিপোর্ট অ্যাপ টিমের কাছে পাঠানো হয়েছে।', reportEmpty: 'আগে কিছু বিস্তারিত লিখুন।',
     copied: 'ক্লিপবোর্ডে কপি হয়েছে', sharedOk: 'শেয়ার হয়েছে — ধন্যবাদ!', nearestSet: 'সবচেয়ে কাছের স্টপ সেট হয়েছে: ',
     geoErr: 'GPS লোকেশন পাওয়া যাচ্ছে না। আবার চেষ্টা করুন, অথবা স্টপের নাম লিখে দিন।', geoNA: 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।',
     geoDenied: 'লোকেশনের অনুমতি বন্ধ আছে। Facebook বা Telegram-এর ভিতরে খুলে থাকলে Safari-তে সাইটটা খুলুন, আর লোকেশন চাইলে Allow করুন।',
@@ -1639,12 +1641,21 @@ $('reportForm').addEventListener('submit', e => {
   reps.unshift(rep);
   store.set('reports', reps.slice(0, 20));
   renderReports();
-  const msg = $('reportMsg');
-  msg.innerHTML = esc(s.reportThanks) + '<br><button type="button" id="shareReportBtn">' + esc(s.shareReport) + '</button>';
-  msg.classList.add('show');
-  $('shareReportBtn').addEventListener('click', () => shareText(s.shareTextIntro + ' — ' + (s.repTypeNames[rep.type] || rep.type) + ': ' + rep.details));
   $('reportDetails').value = '';
   $('reportContact').value = '';
+  const msg = $('reportMsg');
+  msg.textContent = s.reportSending;
+  msg.classList.add('show');
+  const typeEn = (STRINGS.en.repTypeNames[rep.type] || rep.type);
+  const payload = { _subject: 'Bus Finder report: ' + typeEn, _template: 'table', _captcha: 'false', type: typeEn, details: rep.details, name: rep.name || '-', contact: rep.contact || '-' };
+  if (rep.contact && rep.contact.includes('@')) payload.email = rep.contact;
+  const showMsg = sent => {
+    msg.innerHTML = esc(sent ? s.reportThanks : s.reportOffline) + '<br><button type="button" id="shareReportBtn">' + esc(s.shareReport) + '</button>';
+    $('shareReportBtn').addEventListener('click', () => shareText(s.shareTextIntro + ' — ' + (s.repTypeNames[rep.type] || rep.type) + ': ' + rep.details));
+  };
+  fetch('https://formsubmit.co/ajax/nafiz7572@gmail.com', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) })
+    .then(r => r.json()).then(j => showMsg(!!(j && (j.success === true || j.success === 'true'))))
+    .catch(() => showMsg(false));
 });
 
 /* ---------- language ---------- */
