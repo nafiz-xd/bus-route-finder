@@ -171,8 +171,36 @@ section.block{margin-top:30px}
 [data-theme="dark"] .badge.combo{background:#3a2c10;color:#ffd98a}
 .badge.fare{background:var(--green);color:#fff}
 .badge.time{background:var(--surface2);border:1.5px solid var(--border);color:var(--text)}
-.j-actions{display:flex;gap:8px;margin-top:12px;border-top:1px dashed var(--border);padding-top:11px}
-.j-actions button{flex:1;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:11px;padding:9px 4px;font-size:13.5px;font-weight:700;transition:.2s}
+.j-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;border-top:1px dashed var(--border);padding-top:11px}
+.j-actions button{flex:1 1 42%;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:11px;padding:9px 4px;font-size:13.5px;font-weight:700;transition:.2s}
+.j-actions button.live-btn{background:var(--green);border-color:var(--green);color:#fff}
+.leg-mid{cursor:pointer}
+.leg-chev{margin-left:auto;color:var(--muted);transition:transform .3s;font-size:13px}
+.leg.open .leg-chev{transform:rotate(180deg)}
+.leg-stops{max-height:0;overflow:hidden;transition:max-height .5s ease}
+.leg-stops-in{padding:8px 4px 4px 26px}
+.ls-row{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:14px}
+.ls-dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--green);flex:none}
+.ls-row.first .ls-dot{background:var(--amber);border-color:var(--amber)}
+.ls-row.last .ls-dot{background:var(--green)}
+.ls-idx{margin-left:auto;color:var(--muted);font-size:12px}
+#livePanel{display:none;margin-top:6px}
+#livePanel.show{display:block;animation:fadeUp .4s both}
+#livePanel .card{padding:12px}
+#liveMap{height:260px;border-radius:14px;overflow:hidden;background:var(--surface2);margin-bottom:10px}
+.live-status{font-weight:700;font-size:15.5px;margin:2px 0 8px}
+.live-status small{display:block;color:var(--muted);font-weight:600;margin-top:2px;font-size:13.5px}
+.live-progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:10px}
+.live-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),#13a354);border-radius:99px;transition:width .6s ease}
+.live-stop{display:flex;align-items:center;gap:10px;padding:7px 2px;cursor:pointer}
+.live-stop .ld{width:17px;height:17px;border-radius:50%;border:2.5px solid var(--border);flex:none;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:#fff;background:var(--surface)}
+.live-stop.done .ld{background:var(--green);border-color:var(--green)}
+.live-stop.done .lname{color:var(--muted);text-decoration:line-through}
+.live-stop.next .ld{border-color:var(--amber);animation:nearPulse 1.2s ease-in-out infinite}
+.live-stop .lname{font-weight:600;font-size:14.5px}
+.live-stop .ltag{margin-left:auto;font-size:11px;font-weight:800;background:#fdeeda;color:#9a6206;padding:3px 8px;border-radius:999px}
+[data-theme="dark"] .live-stop .ltag{background:#3a2c10;color:#ffd98a}
+.live-hint{color:var(--muted);font-size:13px;margin-top:8px;font-weight:600}
 .j-actions button:hover{border-color:var(--green);color:var(--green)}
 .j-actions button:active{transform:scale(.95)}
 .j-actions button.saved{border-color:var(--amber);background:#fff8ea;color:#9a6206}
@@ -365,7 +393,7 @@ footer b{color:var(--text)}
         <div class="inwrap">
           <span class="dot-ic"></span>
           <input id="fromInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
-          <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button>
+          <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="23" height="23" viewBox="0 0 48 48" aria-hidden="true"><defs><clipPath id="nearPinClip"><path d="M24 3c-8.6 0-15.5 6.9-15.5 15.4C8.5 29.6 24 45 24 45s15.5-15.4 15.5-26.6C39.5 9.9 32.6 3 24 3z"/></clipPath></defs><g clip-path="url(#nearPinClip)"><rect width="48" height="48" fill="#34A853"/><polygon fill="#FBBC04" points="24,18 0,25 0,48 24,48"/><polygon fill="#EA4335" points="24,18 0,5 0,25"/><polygon fill="#4285F4" points="24,18 0,5 7,0 29,0"/><polygon fill="#669DF6" points="24,18 29,0 48,0 48,15"/></g><circle cx="24" cy="18" r="6.4" fill="#fff"/></svg></button>
         </div>
       </div>
       <div class="swap-row">
@@ -432,6 +460,17 @@ footer b{color:var(--text)}
         <div class="map-head"><b id="mapTitle">Route map</b><button id="mapClose" type="button" aria-label="Close map">✕</button></div>
         <div id="map"></div>
         <button id="gmapsBtn" type="button" data-i18n="gmapsBtn">🌐 Open in Google Maps (live traffic)</button>
+      </div>
+    </div>
+
+    <div id="livePanel">
+      <div class="card">
+        <div class="map-head"><b id="liveTitle">Live trip</b><button id="liveClose" type="button">✕</button></div>
+        <div id="liveStatus" class="live-status"></div>
+        <div class="live-progress"><i id="liveBar"></i></div>
+        <div id="liveMap"></div>
+        <div id="liveStops"></div>
+        <p id="liveHint" class="live-hint"></p>
       </div>
     </div>
 
@@ -555,6 +594,7 @@ const STRINGS = {
     metroTitle: 'Metro Rail — MRT-6', metroSub: 'Uttara North ↔ Kamalapur',
     metroNote: 'Tip: search results can combine a bus with the metro — get down at an interchange station and continue by Metro Rail to skip traffic. Tap a "Bus interchange" station below to see which buses you can catch there.',
     gmapsBtn: 'Open in Google Maps (live traffic)', busesFromHere: 'Buses you can catch from here', setFromBtn: 'Set as From', fromSet: 'Starting point set: ',
+    liveBtn: 'Live trip', liveNext: 'Next stop', liveLeft: 'stops left', liveAway: 'away', liveArrived: 'You have arrived at your destination!', liveChange: 'Change here — take', liveGpsWait: 'Waiting for GPS… keep this page open while you travel.', liveTracking: 'GPS tracking is on — stops will be ticked off as you pass them.', liveManual: 'GPS is off or unavailable — tap a stop when you reach it to tick it off.', liveEnd: 'End trip', allStops: 'All stoppages',
     interchange: 'Bus interchange',
     reportTitle: 'Report & Suggest', reportSub: 'Help keep the data right', reportType: 'Report type',
     rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
@@ -597,6 +637,7 @@ const STRINGS = {
     metroTitle: 'মেট্রো রেল — MRT-6', metroSub: 'উত্তরা উত্তর ↔ কমলাপুর',
     metroNote: 'টিপস: সার্চ রেজাল্টে বাসের সাথে মেট্রো মিলিয়ে যাত্রা সাজানো হয় — ইন্টারচেঞ্জ স্টেশনে নেমে মেট্রোতে উঠলে যানজট এড়ানো যায়। কোন বাস পাবেন দেখতে নিচে "বাস ইন্টারচেঞ্জ" স্টেশনে ট্যাপ করুন।',
     gmapsBtn: 'Google Maps-এ খুলুন (লাইভ ট্রাফিক)', busesFromHere: 'এখান থেকে যেসব বাস ধরতে পারবেন', setFromBtn: 'From হিসেবে নিন', fromSet: 'From সেট হয়েছে: ',
+    liveBtn: 'লাইভ যাত্রা', liveNext: 'পরের স্টপ', liveLeft: 'টা স্টপ বাকি', liveAway: 'দূরে', liveArrived: 'আপনি গন্তব্যে পৌঁছে গেছেন!', liveChange: 'এখানে বদলান — ধরুন', liveGpsWait: 'GPS-এর জন্য অপেক্ষা করা হচ্ছে… যাত্রার সময় পেজটা খোলা রাখুন।', liveTracking: 'GPS tracking চলছে — stop পেরোলেই ✓ হয়ে যাবে।', liveManual: 'GPS off বা পাওয়া যাচ্ছে না — কোনো স্টপে পৌঁছালে সেটায় tap করে ✓ দিন।', liveEnd: 'যাত্রা শেষ', allStops: 'সব স্টপেজ',
     interchange: 'বাস ইন্টারচেঞ্জ',
     reportTitle: 'রিপোর্ট ও পরামর্শ', reportSub: 'তথ্য ঠিক রাখতে সাহায্য করুন', reportType: 'রিপোর্টের ধরন',
     rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
@@ -988,9 +1029,13 @@ function legHTML(leg) {
     '<span class="svc">' + esc(leg.kind === 'metro' ? (lang === 'bn' ? 'মেট্রো রেল (MRT-6)' : METRO_NAME) : leg.service) + '</span>' +
     '<span class="type-chip' + (leg.kind === 'metro' ? ' metro' : '') + '">' + esc(typeLabel(leg.type)) + '</span>' +
     '<span class="ride">' + esc(s.towards) + ' ' + esc(stopName(leg.towards)) + ' · ' + esc(rideTxt) + '</span>' +
-    '<span class="legfare">' + fmtMoney(leg.fare) + '<small>' + fmtTime(leg.rideMin + leg.waitMin) + (leg.studentApplied ? ' · ' + esc(s.studentTag) : '') + '</small></span></div>' +
+    '<span class="legfare">' + fmtMoney(leg.fare) + '<small>' + fmtTime(leg.rideMin + leg.waitMin) + (leg.studentApplied ? ' · ' + esc(s.studentTag) : '') + '</small></span>' +
+    '<span class="leg-chev" title="' + esc(s.allStops) + '">▾</span></div>' +
     '<div class="trow"><span class="tdot alight' + (leg.kind === 'metro' ? ' metro-dot' : '') + '" style="--d:' + d2.toFixed(2) + 's"></span>' +
     '<div><div class="tname">' + esc(stopName(leg.alight)) + '</div><div class="tsub">' + esc(s.getDownAt) + '</div></div></div>' +
+    '<div class="leg-stops"><div class="leg-stops-in">' +
+    leg.stops.map((st, i) => '<div class="ls-row' + (i === 0 ? ' first' : i === leg.stops.length - 1 ? ' last' : '') + '"><span class="ls-dot"></span><span>' + esc(stopName(st)) + '</span><span class="ls-idx">' + fmtN(i + 1) + '/' + fmtN(leg.stops.length) + '</span></div>').join('') +
+    '</div></div>' +
     '</div>';
 }
 function journeyHTML(jn, idx) {
@@ -1020,6 +1065,7 @@ function journeyHTML(jn, idx) {
     '<span class="badge time">⏱ ' + fmtTime(jn.totalMin) + '</span></div>' +
     '<div class="legs">' + body + '</div>' +
     '<div class="j-actions">' +
+    '<button type="button" data-act="live" data-idx="' + idx + '" class="live-btn">▶ ' + esc(s.liveBtn) + '</button>' +
     '<button type="button" data-act="map" data-idx="' + idx + '">' + esc(s.mapBtn) + '</button>' +
     '<button type="button" data-act="save" data-idx="' + idx + '" class="' + (fav ? 'saved' : '') + '">' + esc(fav ? s.savedBtn : s.saveBtn) + '</button>' +
     '<button type="button" data-act="share" data-idx="' + idx + '">' + esc(s.shareBtn) + '</button>' +
@@ -1039,7 +1085,8 @@ function renderResults() {
   $('resultsList').innerHTML = lastJourneys.map((jn, i) => journeyHTML(jn, i)).join('');
   $('resultsList').querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', () => {
     const jn = lastJourneys[+b.dataset.idx];
-    if (b.dataset.act === 'map') showMap(jn);
+    if (b.dataset.act === 'live') startLive(jn);
+    else if (b.dataset.act === 'map') showMap(jn);
     else if (b.dataset.act === 'save') { const now = toggleFav(lastFrom, lastTo); b.classList.toggle('saved', now); b.textContent = now ? S().savedBtn : S().saveBtn; }
     else if (b.dataset.act === 'share') shareJourney(jn);
   }));
@@ -1114,6 +1161,118 @@ $('gmapsBtn').addEventListener('click', () => {
   const wp = uniq.slice(1, -1).slice(0, 9).map(p => p.join(',')).join('|');
   if (wp) url += '&waypoints=' + encodeURIComponent(wp);
   window.open(url, '_blank');
+});
+
+/* ---------- leg stoppages expansion ---------- */
+$('resultsList').addEventListener('click', e => {
+  const mid = e.target.closest('.leg-mid');
+  if (!mid) return;
+  const leg = mid.closest('.leg'), box = leg.querySelector('.leg-stops');
+  const open = leg.classList.toggle('open');
+  box.style.maxHeight = open ? box.scrollHeight + 'px' : '0px';
+});
+
+/* ---------- live trip ---------- */
+let live = null, liveMapObj = null, liveLayers = null;
+function havM(a, b) {
+  const R = 6371000, t = Math.PI / 180;
+  const dLa = (b[0] - a[0]) * t, dLo = (b[1] - a[1]) * t;
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[0] * t) * Math.cos(b[0] * t) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function fmtDist(m) { return m < 1000 ? fmtN(Math.round(m)) + ' m' : fmtN((m / 1000).toFixed(1)) + ' km'; }
+function startLive(jn) {
+  stopLive(true);
+  const s = S();
+  const stops = [];
+  jn.legs.forEach((leg, li) => {
+    leg.stops.forEach((st, si) => {
+      if (stops.length && stops[stops.length - 1].name === st) return;
+      stops.push({ name: st, coord: COORDS[st] || null, service: leg.kind === 'metro' ? (lang === 'bn' ? 'মেট্রো রেল' : 'Metro Rail') : leg.service, transfer: si === 0 && li > 0 });
+    });
+  });
+  live = { stops: stops, passed: 0, watchId: null, arrived: false, notedTransfer: -1, lastDist: null, gpsOn: false };
+  $('livePanel').classList.add('show');
+  $('liveTitle').textContent = '🔴 ' + s.liveBtn + ': ' + stopName(lastFrom) + ' → ' + stopName(lastTo);
+  $('liveClose').textContent = '✕ ' + s.liveEnd;
+  $('liveHint').textContent = s.liveGpsWait;
+  renderLive();
+  setTimeout(() => $('livePanel').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }), 40);
+  initLiveMap();
+  if (navigator.geolocation) {
+    live.watchId = navigator.geolocation.watchPosition(onLivePos, onLiveErr, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
+  } else { $('liveHint').textContent = s.liveManual; }
+}
+function renderLive() {
+  if (!live) return;
+  const s = S();
+  const total = live.stops.length;
+  $('liveStops').innerHTML = live.stops.map((st, i) => {
+    const cls = i <= live.passed ? 'done' : (i === live.passed + 1 ? 'next' : '');
+    const tag = st.transfer ? '<span class="ltag">⇄ ' + esc(st.service) + '</span>' : '';
+    return '<div class="live-stop ' + cls + '" data-i="' + i + '"><span class="ld">' + (i <= live.passed ? '✓' : '') + '</span><span class="lname">' + esc(stopName(st.name)) + '</span>' + tag + '</div>';
+  }).join('');
+  $('liveBar').style.width = (total > 1 ? (live.passed / (total - 1)) * 100 : 100) + '%';
+  const st = $('liveStatus');
+  if (live.arrived || live.passed >= total - 1) st.innerHTML = '🎉 ' + esc(s.liveArrived);
+  else {
+    const nx = live.stops[live.passed + 1];
+    st.innerHTML = esc(s.liveNext) + ': <b>' + esc(stopName(nx.name)) + '</b><small>' + fmtN(total - 1 - live.passed) + ' ' + esc(s.liveLeft) + (live.lastDist != null ? ' · ' + fmtDist(live.lastDist) + ' ' + esc(s.liveAway) : '') + '</small>';
+  }
+  drawLiveMap(false);
+}
+function onLivePos(pos) {
+  if (!live) return;
+  const u = [pos.coords.latitude, pos.coords.longitude];
+  userLoc = u;
+  if (!live.gpsOn) { live.gpsOn = true; $('liveHint').textContent = S().liveTracking; }
+  let best = -1, bd = 1e18;
+  live.stops.forEach((st, i) => { if (!st.coord) return; const d = havM(u, st.coord); if (d < bd) { bd = d; best = i; } });
+  const nx = live.stops[live.passed + 1];
+  live.lastDist = nx && nx.coord ? havM(u, nx.coord) : null;
+  if (best > live.passed && bd < 220) {
+    live.passed = best;
+    if (live.stops[best].transfer && live.notedTransfer !== best) { live.notedTransfer = best; toast(S().liveChange + ' ' + live.stops[best].service); }
+    if (best >= live.stops.length - 1 && !live.arrived) { live.arrived = true; toast(S().liveArrived); if (navigator.vibrate) navigator.vibrate(200); }
+  }
+  renderLive();
+}
+function onLiveErr() { if (live) $('liveHint').textContent = S().liveManual; }
+function initLiveMap() {
+  const el = $('liveMap');
+  if (typeof L === 'undefined') { el.innerHTML = '<div class="map-fallback">' + esc(S().mapFail) + '</div>'; return; }
+  if (!liveMapObj) {
+    liveMapObj = L.map('liveMap');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(liveMapObj);
+    liveLayers = L.layerGroup().addTo(liveMapObj);
+  }
+  setTimeout(() => { if (liveMapObj) { liveMapObj.invalidateSize(); drawLiveMap(true); } }, 80);
+}
+function drawLiveMap(fit) {
+  if (!live || !liveMapObj || !liveLayers) return;
+  liveLayers.clearLayers();
+  const pts = live.stops.filter(st => st.coord).map(st => st.coord);
+  if (pts.length > 1) L.polyline(pts, { color: '#0e7a3d', weight: 5, opacity: .8, className: 'route-line' }).addTo(liveLayers);
+  live.stops.forEach((st, i) => {
+    if (!st.coord) return;
+    const done = i <= live.passed, next = i === live.passed + 1;
+    L.circleMarker(st.coord, { radius: done || next ? 8 : 5.5, color: '#0a5c2e', weight: 2, fillColor: done ? '#0e7a3d' : next ? '#f5a623' : '#ffffff', fillOpacity: .95 }).addTo(liveLayers).bindPopup('<b>' + esc(stopName(st.name)) + '</b>');
+  });
+  if (userLoc) L.circleMarker(userLoc, { radius: 9, color: '#ffffff', weight: 3, fillColor: '#1a73e8', fillOpacity: 1 }).addTo(liveLayers).bindPopup(esc(S().youAreHere));
+  if (fit && pts.length) liveMapObj.fitBounds(L.latLngBounds(pts).pad(0.12));
+}
+function stopLive(silent) {
+  if (live && live.watchId != null && navigator.geolocation) navigator.geolocation.clearWatch(live.watchId);
+  live = null;
+  if (!silent) $('livePanel').classList.remove('show');
+}
+$('liveClose').addEventListener('click', () => stopLive(false));
+$('liveStops').addEventListener('click', e => {
+  const row = e.target.closest('.live-stop');
+  if (!row || !live) return;
+  live.passed = +row.dataset.i;
+  if (live.passed >= live.stops.length - 1 && !live.arrived) { live.arrived = true; toast(S().liveArrived); if (navigator.vibrate) navigator.vibrate(200); }
+  renderLive();
 });
 
 /* ---------- bus directory ---------- */
