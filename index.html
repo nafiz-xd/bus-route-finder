@@ -286,8 +286,12 @@ section.block{margin-top:30px}
 /* ---------- footer / toast ---------- */
 footer{max-width:1060px;margin:36px auto 0;padding:22px 16px 34px;text-align:center;color:var(--muted);font-size:13.5px;border-top:1px solid var(--border)}
 footer b{color:var(--text)}
-#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,80px);background:#17301f;color:#eafff1;padding:12px 20px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 14px 30px rgba(0,0,0,.3);z-index:1500;transition:transform .4s cubic-bezier(.2,1.2,.3,1);pointer-events:none;max-width:88vw;text-align:center}
-#toast.show{transform:translate(-50%,0)}
+#toast{position:fixed;left:50%;top:calc(72px + env(safe-area-inset-top));transform:translate(-50%,-14px);opacity:0;visibility:hidden;background:#17301f;color:#eafff1;padding:12px 20px;border-radius:16px;font-weight:700;font-size:14px;box-shadow:0 14px 30px rgba(0,0,0,.3);z-index:1500;transition:opacity .3s ease,transform .3s ease,visibility 0s linear .3s;pointer-events:none;max-width:88vw;text-align:center}
+#toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:opacity .3s ease,transform .3s ease}
+.bus-type-label{font-weight:700;color:var(--muted,#5b6b7a);font-size:14px}
+.dir-chips{display:flex;gap:8px;margin:12px 0 2px}
+.dir-chips button{border:1.5px solid var(--border,#dce5df);background:var(--card,#fff);color:var(--ink,#1c2530);border-radius:999px;padding:7px 16px;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s}
+.dir-chips button.active{background:var(--green,#0e7a3d);border-color:var(--green,#0e7a3d);color:#fff}
 
 @media (max-width:560px){
   .appbar .brand small{display:none}
@@ -376,6 +380,15 @@ footer b{color:var(--text)}
         </div>
       </div>
 
+      <div class="toggle-row">
+        <span class="bus-type-label" data-i18n="busType">Bus type</span>
+        <div class="seg" role="group" aria-label="Bus type">
+          <button type="button" id="segAcAll" class="active" data-i18n="acAll">All</button>
+          <button type="button" id="segAcAC" data-i18n="acOnly">AC</button>
+          <button type="button" id="segAcNon" data-i18n="nonAcOnly">Non-AC</button>
+        </div>
+      </div>
+
       <button id="searchBtn" type="button"><span class="spinner"></span><span id="searchBtnText" data-i18n="search">Search routes</span></button>
       <div id="searchError" role="alert"></div>
     </div>
@@ -422,6 +435,11 @@ footer b{color:var(--text)}
   <section class="block reveal" id="busesSection">
     <div class="sec-head"><h3>🚌 <span data-i18n="allBuses">All Bus Services</span></h3><span class="sub" data-i18n="allBusesSub">Tap a bus to see its full route</span></div>
     <input class="filter-in" id="busFilter" type="text" data-i18n-ph="busFilterPh" placeholder="Filter buses by name…">
+    <div class="dir-chips" id="dirAcChips">
+      <button type="button" data-dac="all" class="active" data-i18n="acAll">All</button>
+      <button type="button" data-dac="ac" data-i18n="acOnly">AC</button>
+      <button type="button" data-dac="nonac" data-i18n="nonAcOnly">Non-AC</button>
+    </div>
     <div id="busList"></div>
   </section>
 
@@ -543,7 +561,9 @@ const STRINGS = {
     firstBus: 'First', lastBus: 'Last', every: 'Every', busesVia: 'buses pass this stop', noBusVia: 'No bus found for this stop yet.',
     reportThanks: 'Thanks! Your report was saved on this device.', reportEmpty: 'Please write a few details first.',
     copied: 'Copied to clipboard', sharedOk: 'Shared — thank you!', nearestSet: 'Nearest stop set: ',
-    geoErr: 'Could not get your location. Please type your stop instead.', geoNA: 'Location is not available on this device.',
+    geoErr: 'Location not found — it may be off or permission is denied, so Near me cannot work. Please type your stop name instead.', geoNA: 'Location is not available on this device.',
+    busType: 'Bus type', acAll: 'All', acOnly: 'AC', nonAcOnly: 'Non-AC',
+    noAcRoute: 'No AC bus runs on this route yet. Switch Bus type to "All" to see every option.', noNonAcRoute: 'Every option on this route uses an AC bus or the Metro. Switch Bus type to "All" to see them.',
     mapFail: 'Map could not be loaded (it needs internet). The journey details above are still complete.',
     studentTag: 'student', youAreHere: 'You are here', shareTextIntro: 'Dhaka Bus Route Finder',
     repTypeNames: { wrong: 'Wrong route info', bus: 'Missing bus', stop: 'Missing stop', other: 'Other' }
@@ -581,7 +601,9 @@ const STRINGS = {
     firstBus: 'প্রথম', lastBus: 'শেষ', every: 'প্রতি', busesVia: 'টি বাস এই স্টপ দিয়ে যায়', noBusVia: 'এই স্টপের জন্য এখনো কোনো বাস পাওয়া যায়নি।',
     reportThanks: 'ধন্যবাদ! আপনার রিপোর্ট এই ডিভাইসে সেভ হয়েছে।', reportEmpty: 'আগে কিছু বিস্তারিত লিখুন।',
     copied: 'ক্লিপবোর্ডে কপি হয়েছে', sharedOk: 'শেয়ার হয়েছে — ধন্যবাদ!', nearestSet: 'সবচেয়ে কাছের স্টপ সেট হয়েছে: ',
-    geoErr: 'আপনার লোকেশন পাওয়া যায়নি। স্টপের নাম লিখে দিন।', geoNA: 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।',
+    geoErr: 'লোকেশন পাওয়া যায়নি — Location off থাকলে বা permission না দিলে Near me চলবে না। স্টপের নাম লিখে দিন।', geoNA: 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।',
+    busType: 'বাসের ধরন', acAll: 'সব', acOnly: 'এসি', nonAcOnly: 'নন-এসি',
+    noAcRoute: 'এই রুটে এখনো কোনো এসি বাস নেই। সব অপশন দেখতে বাসের ধরন "সব" করুন।', noNonAcRoute: 'এই রুটের সব অপশনেই এসি বাস বা মেট্রো লাগছে। দেখতে বাসের ধরন "সব" করুন।',
     mapFail: 'ম্যাপ লোড করা যায়নি (ইন্টারনেট লাগে)। উপরের যাত্রার বিবরণ ঠিকঠাক আছে।',
     studentTag: 'ছাত্র', youAreHere: 'আপনি এখানে', shareTextIntro: 'ঢাকা বাস রুট ফাইন্ডার',
     repTypeNames: { wrong: 'ভুল রুট তথ্য', bus: 'বাস নেই', stop: 'স্টপ নেই', other: 'অন্যান্য' }
@@ -729,6 +751,9 @@ let lang = store.get('lang', 'en');
 let peak = store.get('peak', null);
 if (peak === null) { const h = new Date().getHours(); peak = (h >= 7 && h < 11) || (h >= 16 && h < 21); }
 let student = !!store.get('student', false);
+let acFilter = store.get('acFilter', 'all');
+let dirAc = 'all';
+let lastAllCount = 0;
 let lastJourneys = [], lastFrom = '', lastTo = '', userLoc = null, dotCounter = 0;
 
 const S = () => STRINGS[lang] || STRINGS.en;
@@ -746,7 +771,7 @@ function typeLabel(t) {
 }
 function toast(msg) {
   const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2400);
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3400);
 }
 
 /* ---------- theme ---------- */
@@ -841,10 +866,17 @@ function syncToggles() {
   $('studentToggle').checked = student;
   $('segPeak').classList.toggle('active', peak);
   $('segOff').classList.toggle('active', !peak);
+  $('segAcAll').classList.toggle('active', acFilter === 'all');
+  $('segAcAC').classList.toggle('active', acFilter === 'ac');
+  $('segAcNon').classList.toggle('active', acFilter === 'nonac');
 }
 $('studentToggle').addEventListener('change', e => { student = e.target.checked; store.set('student', student); if (lastFrom) renderLast(false); });
 $('segPeak').addEventListener('click', () => { peak = true; store.set('peak', true); syncToggles(); if (lastFrom) renderLast(false); });
 $('segOff').addEventListener('click', () => { peak = false; store.set('peak', false); syncToggles(); if (lastFrom) renderLast(false); });
+function setAcFilter(v) { acFilter = v; store.set('acFilter', v); syncToggles(); if (lastFrom) renderLast(false); }
+$('segAcAll').addEventListener('click', () => setAcFilter('all'));
+$('segAcAC').addEventListener('click', () => setAcFilter('ac'));
+$('segAcNon').addEventListener('click', () => setAcFilter('nonac'));
 syncToggles();
 
 $('nearBtn').addEventListener('click', () => {
@@ -896,14 +928,34 @@ function doSearch() {
     btn.disabled = false; btn.classList.remove('loading');
     $('searchBtnText').textContent = S().search;
     lastFrom = from; lastTo = to;
-    lastJourneys = findJourneys(from, to, { student: student, peak: peak });
+    const allJ = findJourneys(from, to, { student: student, peak: peak });
+    lastAllCount = allJ.length;
+    lastJourneys = applyAcFilter(allJ);
     pushRecent(from, to);
     renderResults();
   }, REDUCED ? 30 : 450);
 }
+function legMatchesAc(leg) {
+  if (acFilter === 'all') return true;
+  const isAc = leg.kind === 'metro' || leg.type === 'AC';
+  return acFilter === 'ac' ? isAc : !isAc;
+}
+function applyAcFilter(list) {
+  if (acFilter === 'all') return list;
+  const out = list.filter(jn => jn.legs.every(legMatchesAc));
+  out.forEach(jn => { jn.fastest = false; jn.cheapest = false; });
+  if (out.length) {
+    let f = out[0], c = out[0];
+    out.forEach(jn => { if (jn.totalMin < f.totalMin) f = jn; if (jn.totalFare < c.totalFare) c = jn; });
+    f.fastest = true; c.cheapest = true;
+  }
+  return out;
+}
 function renderLast(scroll) {
   if (!lastFrom || !lastTo) return;
-  lastJourneys = findJourneys(lastFrom, lastTo, { student: student, peak: peak });
+  const allJ = findJourneys(lastFrom, lastTo, { student: student, peak: peak });
+  lastAllCount = allJ.length;
+  lastJourneys = applyAcFilter(allJ);
   renderResults();
   if (scroll) $('resultsSection').scrollIntoView({ behavior: 'smooth' });
 }
@@ -964,7 +1016,9 @@ function renderResults() {
   $('resultsMeta').innerHTML = esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo)) +
     '<span class="muted">' + fmtN(lastJourneys.length) + ' ' + esc(s.resultsWord) + ' · ' + esc(peak ? s.peak : s.offpeak) + (student ? ' · ' + esc(s.student) : '') + '</span>';
   if (!lastJourneys.length) {
-    $('resultsList').innerHTML = '<div class="no-result">😕 ' + esc(s.noRoute) + '</div>';
+    const msg = (lastAllCount > 0 && acFilter === 'ac') ? s.noAcRoute
+      : (lastAllCount > 0 && acFilter === 'nonac') ? s.noNonAcRoute : s.noRoute;
+    $('resultsList').innerHTML = '<div class="no-result">😕 ' + esc(msg) + '</div>';
     return;
   }
   $('resultsList').innerHTML = lastJourneys.map((jn, i) => journeyHTML(jn, i)).join('');
@@ -1038,7 +1092,7 @@ $('mapClose').addEventListener('click', () => $('mapPanel').classList.remove('sh
 function renderDirectory(filter) {
   const s = S();
   const q = (filter || '').trim().toLowerCase();
-  const list = BUSES.filter(b => !q || b.name.toLowerCase().includes(q));
+  const list = BUSES.filter(b => (!q || b.name.toLowerCase().includes(q)) && (dirAc === 'all' || (dirAc === 'ac' ? b.type === 'AC' : b.type !== 'AC')));
   $('busList').innerHTML = list.length ? list.map(b => {
     const stops = b.stops.map((st, i) => (i ? '<span class="arrw">→</span>' : '') + '<span class="stp"><i></i>' + esc(stopName(st)) + '</span>').join('');
     return '<div class="bus-row"><button type="button" class="bus-head">' +
@@ -1057,6 +1111,12 @@ function renderDirectory(filter) {
   }));
 }
 $('busFilter').addEventListener('input', e => renderDirectory(e.target.value));
+$('dirAcChips').addEventListener('click', e => {
+  const b = e.target.closest('button[data-dac]'); if (!b) return;
+  dirAc = b.dataset.dac;
+  $('dirAcChips').querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+  renderDirectory($('busFilter').value);
+});
 
 /* ---------- stop board ---------- */
 let boardStop = null;
