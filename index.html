@@ -99,6 +99,8 @@ main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
 [data-theme="dark"] #nearBtn{color:#8fe3ae}
 #nearBtn:active{transform:translateY(-50%) scale(.92)}
 #nearBtn.busy svg{animation:nearPulse 1s ease-in-out infinite}
+#nearBtn.hint::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--green);animation:nearHint 1.8s ease-out infinite;pointer-events:none}
+@keyframes nearHint{0%{transform:scale(.75);opacity:.9}70%{transform:scale(1.45);opacity:0}100%{transform:scale(1.45);opacity:0}}
 @keyframes nearPulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hero-banner{border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 10px 26px rgba(0,0,0,.22);line-height:0}
 .hero-banner img{width:100%;height:clamp(120px,26vw,168px);object-fit:cover;animation:kenburns 16s ease-in-out infinite alternate}
@@ -476,7 +478,7 @@ footer b{color:var(--text)}
         <div class="inwrap">
           <span class="dot-ic"></span>
           <input id="fromInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
-          <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="21" height="21" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3c-8.6 0-15.5 6.9-15.5 15.4C8.5 29.6 24 45 24 45s15.5-15.4 15.5-26.6C39.5 9.9 32.6 3 24 3z" fill="currentColor"/><circle cx="24" cy="18" r="6.6" fill="var(--surface2)"/></svg></button>
+          <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><path d="M12 2.6v2.9M12 18.5v2.9M2.6 12h2.9M18.5 12h2.9"/></svg></button>
         </div>
       </div>
       <div class="field">
@@ -1133,7 +1135,9 @@ $('resetBtn').addEventListener('click', () => {
 });
 syncToggles();
 
+if (!store.get('nearSeen')) $('nearBtn').classList.add('hint');
 $('nearBtn').addEventListener('click', () => {
+  $('nearBtn').classList.remove('hint'); store.set('nearSeen', 1);
   const s = S();
   if (!navigator.geolocation) { toast(s.geoNA); return; }
   const btn = $('nearBtn'); btn.disabled = true; btn.classList.add('busy');
