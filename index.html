@@ -100,8 +100,18 @@ main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
 #nearBtn:active{transform:translateY(-50%) scale(.92)}
 #nearBtn.busy svg{animation:nearPulse 1s ease-in-out infinite}
 @keyframes nearPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-banner{border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 10px 26px rgba(0,0,0,.22);line-height:0}
+.hero-banner img{width:100%;height:clamp(120px,26vw,168px);object-fit:cover;animation:kenburns 16s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.13) translateX(-10px)}}
+.fields-wrap{position:relative}
+#searchEmpty{margin-top:26px;text-align:center;padding:22px 18px}
+#searchEmpty .empty-img{background:#fff;border-radius:16px;padding:10px 6px 2px}
+#searchEmpty .empty-img img{width:min(78%,300px);display:block;margin:0 auto}
+#searchEmpty h3{font-size:19px;margin-top:14px}
+#searchEmpty p{color:var(--muted);font-size:14px;line-height:1.55;margin-top:5px}
 .swap-row{display:flex;justify-content:center;padding:1px 6px}
 #swapBtn{width:40px;height:40px;border-radius:50%;border:2px solid var(--green);background:var(--surface);color:var(--green);font-size:19px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .5s cubic-bezier(.55,-0.3,.3,1.35),background .3s;box-shadow:var(--shadow-sm)}
+#swapBtn{position:absolute;left:50%;top:120px;margin:-22px 0 0 -22px;z-index:6}
 #swapBtn.flipped{transform:rotate(180deg)}
 #swapBtn:active{scale:.92}
 .toggle-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:14px 2px 16px}
@@ -405,6 +415,7 @@ footer b{color:var(--text)}
 <div class="hero">
   <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
   <div class="hero-in">
+    <div class="hero-banner"><img src="hero.jpg" alt="" fetchpriority="high"></div>
     <h2><span data-i18n="heroTitleA">Where do you want to</span> <span class="hl" data-i18n="heroTitleB">go today?</span></h2>
     <p data-i18n="heroSub">Direct buses, smart one-transfer journeys and Metro Rail combos — with fares &amp; travel times.</p>
     <div class="stats">
@@ -419,6 +430,7 @@ footer b{color:var(--text)}
   <div class="wrap-narrow">
     <!-- search card -->
     <div class="search-card">
+      <div class="fields-wrap">
       <div class="field">
         <label for="fromInput" data-i18n="fromLabel">From</label>
         <div class="inwrap">
@@ -427,15 +439,14 @@ footer b{color:var(--text)}
           <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="21" height="21" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3c-8.6 0-15.5 6.9-15.5 15.4C8.5 29.6 24 45 24 45s15.5-15.4 15.5-26.6C39.5 9.9 32.6 3 24 3z" fill="currentColor"/><circle cx="24" cy="18" r="6.6" fill="var(--surface2)"/></svg></button>
         </div>
       </div>
-      <div class="swap-row">
-        <button id="swapBtn" type="button" aria-label="Swap from and to">⇅</button>
-      </div>
       <div class="field">
         <label for="toInput" data-i18n="toLabel">To</label>
         <div class="inwrap">
           <span class="dot-ic to"></span>
           <input id="toInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="toPh" placeholder="To — where do you want to go?">
         </div>
+      </div>
+      <button id="swapBtn" type="button" aria-label="Swap from and to">⇅</button>
       </div>
       <datalist id="stopList"></datalist>
 
@@ -477,6 +488,13 @@ footer b{color:var(--text)}
         <h4 data-i18n="recent">Recent searches</h4>
         <div class="chips" id="chipsRecent"></div>
       </div>
+    </div>
+
+    <!-- search empty state (illustrated, hides after first search) -->
+    <div id="searchEmpty" class="card">
+      <div class="empty-img"><img src="search.jpg" alt=""></div>
+      <h3 data-i18n="searchEmptyTitle">Search</h3>
+      <p data-i18n="searchEmptyText">Choose your From and To stops, then tap Search routes — best buses, fares and live trips, all in one place.</p>
     </div>
 
     <!-- results -->
@@ -627,6 +645,7 @@ const STRINGS = {
     gmapsBtn: 'Open in Google Maps (live traffic)', busesFromHere: 'Buses you can catch from here', setFromBtn: 'Set as From', fromSet: 'Starting point set: ',
     liveBtn: 'Live trip', liveNext: 'Next stop', liveLeft: 'stops left', liveAway: 'away', liveArrived: 'You have arrived at your destination!', liveChange: 'Change here — take', liveGpsWait: 'Waiting for GPS… keep this page open while you travel.', liveTracking: 'GPS tracking is on — stops will be ticked off as you pass them.', liveManual: 'GPS is off or unavailable — tap a stop when you reach it to tick it off.', liveEnd: 'End trip', allStops: 'All stoppages',
     tapStopsHint: 'Tap the stop you will board at, then the stop where you will get down.', boardTag: 'Board', alightTag: 'Get down', startTripBtn: 'Start live trip', recenterMe: 'Back to my location',
+    searchEmptyTitle: 'Search', searchEmptyText: 'Choose your From and To stops, then tap Search routes — best buses, fares and live trips, all in one place.',
     interchange: 'Bus interchange',
     reportTitle: 'Report & Suggest', reportSub: 'Help keep the data right', reportType: 'Report type',
     rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
@@ -671,6 +690,7 @@ const STRINGS = {
     gmapsBtn: 'Google Maps-এ খুলুন (লাইভ ট্রাফিক)', busesFromHere: 'এখান থেকে যেসব বাস ধরতে পারবেন', setFromBtn: 'From হিসেবে নিন', fromSet: 'From সেট হয়েছে: ',
     liveBtn: 'লাইভ যাত্রা', liveNext: 'পরের স্টপ', liveLeft: 'টা স্টপ বাকি', liveAway: 'দূরে', liveArrived: 'আপনি গন্তব্যে পৌঁছে গেছেন!', liveChange: 'এখানে বদলান — ধরুন', liveGpsWait: 'GPS-এর জন্য অপেক্ষা করা হচ্ছে… যাত্রার সময় পেজটা খোলা রাখুন।', liveTracking: 'GPS tracking চলছে — stop পেরোলেই ✓ হয়ে যাবে।', liveManual: 'GPS off বা পাওয়া যাচ্ছে না — কোনো স্টপে পৌঁছালে সেটায় tap করে ✓ দিন।', liveEnd: 'যাত্রা শেষ', allStops: 'সব স্টপেজ',
     tapStopsHint: 'যে স্টপ থেকে উঠবেন সেটায় tap করুন, তারপর যেখানে নামবেন সেটায় tap করুন।', boardTag: 'উঠবো', alightTag: 'নামবো', startTripBtn: 'লাইভ যাত্রা শুরু করুন', recenterMe: 'আমার অবস্থানে ফিরুন',
+    searchEmptyTitle: 'খুঁজুন', searchEmptyText: 'From আর To stop বেছে Search routes-এ tap করুন — সেরা bus, ভাড়া আর live trip, সব এক জায়গায়।',
     interchange: 'বাস ইন্টারচেঞ্জ',
     reportTitle: 'রিপোর্ট ও পরামর্শ', reportSub: 'তথ্য ঠিক রাখতে সাহায্য করুন', reportType: 'রিপোর্টের ধরন',
     rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
@@ -952,6 +972,17 @@ $('swapBtn').addEventListener('click', () => {
   const a = $('fromInput').value; $('fromInput').value = $('toInput').value; $('toInput').value = a;
   $('swapBtn').classList.toggle('flipped');
 });
+function placeSwap() {
+  const wrap = document.querySelector('.fields-wrap');
+  if (!wrap) return;
+  const boxes = wrap.querySelectorAll('.inwrap');
+  if (boxes.length < 2) return;
+  const wr = wrap.getBoundingClientRect();
+  const b1 = boxes[0].getBoundingClientRect(), b2 = boxes[1].getBoundingClientRect();
+  $('swapBtn').style.top = ((b1.bottom + b2.top) / 2 - wr.top) + 'px';
+}
+window.addEventListener('resize', placeSwap);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => placeSwap());
 function syncToggles() {
   $('studentToggle').checked = student;
   $('segPeak').classList.toggle('active', peak);
@@ -996,6 +1027,7 @@ function hideError() { $('searchError').classList.remove('show'); }
 function doSearch() {
   const s = S();
   hideError();
+  const se = $('searchEmpty'); if (se) se.style.display = 'none';
   const fromRaw = $('fromInput').value, toRaw = $('toInput').value;
   const from = matchStop(fromRaw), to = matchStop(toRaw);
   if (!from || !to) {
@@ -1534,6 +1566,7 @@ function applyLang(skipStats) {
   renderReports();
   if (boardStop) renderBoard();
   if (lastFrom) renderResults();
+  requestAnimationFrame(placeSwap);
 }
 $('langBtn').addEventListener('click', () => {
   lang = lang === 'bn' ? 'en' : 'bn';
@@ -1576,6 +1609,8 @@ renderDirectory('');
 renderMetro();
 renderReports();
 if (lang === 'bn') applyLang(true);
+requestAnimationFrame(placeSwap);
+setTimeout(placeSwap, 350);
 </script>
 </body>
 </html>
