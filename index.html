@@ -187,7 +187,12 @@ section.block{margin-top:30px}
 #livePanel{display:none;margin-top:6px}
 #livePanel.show{display:block;animation:fadeUp .4s both}
 #livePanel .card{padding:12px}
-#liveMap{height:260px;border-radius:14px;overflow:hidden;background:var(--surface2);margin-bottom:10px}
+#liveMap{height:260px;border-radius:14px;overflow:hidden;background:var(--surface2)}
+.map-wrap{position:relative;margin-bottom:10px}
+#mapPanel .map-wrap{margin-bottom:0}
+.recenter-btn{position:absolute;right:12px;bottom:12px;z-index:1000;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--green);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.28);transition:transform .15s,background .2s;padding:0}
+.recenter-btn:active{transform:scale(.9)}
+[data-theme="dark"] .recenter-btn{color:#8fe3ae}
 .live-status{font-weight:700;font-size:15.5px;margin:2px 0 8px}
 .live-status small{display:block;color:var(--muted);font-weight:600;margin-top:2px;font-size:13.5px}
 .live-progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:10px}
@@ -208,8 +213,25 @@ section.block{margin-top:30px}
 #liveClose:active{transform:scale(.94)}
 #liveStops{position:relative}
 .lt-track{position:absolute;left:10.5px;top:16px;bottom:16px;width:3px;background:var(--border);border-radius:99px;transform:translateX(-50%);z-index:0}
-.lt-track i{display:block;width:100%;background:linear-gradient(180deg,#13a354,var(--green));border-radius:99px;transition:height .6s ease;box-shadow:0 0 7px rgba(14,122,61,.55)}
+.lt-track i{display:block;position:absolute;left:0;right:0;top:0;height:0;background:linear-gradient(180deg,#13a354,var(--green));border-radius:99px;transition:height .6s ease,top .6s ease;box-shadow:0 0 7px rgba(14,122,61,.55)}
 .live-stop{position:relative;z-index:1}
+.dir-hint{color:var(--muted);font-size:13px;font-weight:600;margin:10px 0 2px}
+.dir-route{position:relative;padding:2px 0}
+.dir-route .lt-track{left:9.5px;top:14px;bottom:14px}
+.dir-stop{display:flex;align-items:center;gap:10px;padding:6px 2px;cursor:pointer;position:relative;z-index:1}
+.dir-stop .ld{width:15px;height:15px;border-radius:50%;border:2.5px solid var(--border);background:var(--surface);flex:none;transition:.2s}
+.dir-stop.sel-board .ld{background:var(--green);border-color:var(--green);box-shadow:0 0 7px rgba(14,122,61,.55)}
+.dir-stop.sel-alight .ld{background:var(--amber);border-color:var(--amber);box-shadow:0 0 7px rgba(245,166,35,.55)}
+.dir-stop .lname{font-weight:600;font-size:14.5px}
+.dir-stop .dtag{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;display:none}
+.dir-stop.sel-board .dtag{display:inline-block;background:#e6f4ec;color:var(--green-d)}
+.dir-stop.sel-alight .dtag{display:inline-block;background:#fdeeda;color:#9a6206}
+[data-theme="dark"] .dir-stop.sel-board .dtag{background:#123324;color:#8fe3ae}
+[data-theme="dark"] .dir-stop.sel-alight .dtag{background:#3a2c10;color:#ffd98a}
+.dir-start{width:100%;margin-top:10px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;transition:.2s;font-family:inherit}
+.dir-start:disabled{opacity:.35;cursor:default}
+.dir-start:not(:disabled):active{transform:scale(.98)}
+.brow{cursor:pointer}
 .j-actions button:hover{border-color:var(--green);color:var(--green)}
 .j-actions button:active{transform:scale(.95)}
 .j-actions button.saved{border-color:var(--amber);background:#fff8ea;color:#9a6206}
@@ -402,7 +424,7 @@ footer b{color:var(--text)}
         <div class="inwrap">
           <span class="dot-ic"></span>
           <input id="fromInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
-          <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="23" height="23" viewBox="0 0 48 48" aria-hidden="true"><defs><clipPath id="nearPinClip"><path d="M24 3c-8.6 0-15.5 6.9-15.5 15.4C8.5 29.6 24 45 24 45s15.5-15.4 15.5-26.6C39.5 9.9 32.6 3 24 3z"/></clipPath></defs><g clip-path="url(#nearPinClip)"><rect width="48" height="48" fill="#34A853"/><polygon fill="#FBBC04" points="24,18 0,25 0,48 24,48"/><polygon fill="#EA4335" points="24,18 0,5 0,25"/><polygon fill="#4285F4" points="24,18 0,5 7,0 29,0"/><polygon fill="#669DF6" points="24,18 29,0 48,0 48,15"/></g><circle cx="24" cy="18" r="6.4" fill="#fff"/></svg></button>
+          <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="21" height="21" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3c-8.6 0-15.5 6.9-15.5 15.4C8.5 29.6 24 45 24 45s15.5-15.4 15.5-26.6C39.5 9.9 32.6 3 24 3z" fill="currentColor"/><circle cx="24" cy="18" r="6.6" fill="var(--surface2)"/></svg></button>
         </div>
       </div>
       <div class="swap-row">
@@ -467,7 +489,7 @@ footer b{color:var(--text)}
     <div id="mapPanel">
       <div class="card">
         <div class="map-head"><b id="mapTitle">Route map</b><button id="mapClose" type="button" aria-label="Close map">✕</button></div>
-        <div id="map"></div>
+        <div class="map-wrap"><div id="map"></div><button id="mapRecenter" class="recenter-btn" type="button" aria-label="Back to my location"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button></div>
         <button id="gmapsBtn" type="button" data-i18n="gmapsBtn">🌐 Open in Google Maps (live traffic)</button>
       </div>
     </div>
@@ -477,7 +499,7 @@ footer b{color:var(--text)}
         <div class="map-head"><b id="liveTitle">Live trip</b><button id="liveClose" type="button">✕</button></div>
         <div id="liveStatus" class="live-status"></div>
         <div class="live-progress"><i id="liveBar"></i></div>
-        <div id="liveMap"></div>
+        <div class="map-wrap"><div id="liveMap"></div><button id="liveRecenter" class="recenter-btn" type="button" aria-label="Back to my location"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button></div>
         <div id="liveStops"></div>
         <p id="liveHint" class="live-hint"></p>
       </div>
@@ -604,6 +626,7 @@ const STRINGS = {
     metroNote: 'Tip: search results can combine a bus with the metro — get down at an interchange station and continue by Metro Rail to skip traffic. Tap a "Bus interchange" station below to see which buses you can catch there.',
     gmapsBtn: 'Open in Google Maps (live traffic)', busesFromHere: 'Buses you can catch from here', setFromBtn: 'Set as From', fromSet: 'Starting point set: ',
     liveBtn: 'Live trip', liveNext: 'Next stop', liveLeft: 'stops left', liveAway: 'away', liveArrived: 'You have arrived at your destination!', liveChange: 'Change here — take', liveGpsWait: 'Waiting for GPS… keep this page open while you travel.', liveTracking: 'GPS tracking is on — stops will be ticked off as you pass them.', liveManual: 'GPS is off or unavailable — tap a stop when you reach it to tick it off.', liveEnd: 'End trip', allStops: 'All stoppages',
+    tapStopsHint: 'Tap the stop you will board at, then the stop where you will get down.', boardTag: 'Board', alightTag: 'Get down', startTripBtn: 'Start live trip', recenterMe: 'Back to my location',
     interchange: 'Bus interchange',
     reportTitle: 'Report & Suggest', reportSub: 'Help keep the data right', reportType: 'Report type',
     rtWrong: 'Wrong route info', rtBus: 'Missing bus', rtStop: 'Missing stop', rtOther: 'Other',
@@ -647,6 +670,7 @@ const STRINGS = {
     metroNote: 'টিপস: সার্চ রেজাল্টে বাসের সাথে মেট্রো মিলিয়ে যাত্রা সাজানো হয় — ইন্টারচেঞ্জ স্টেশনে নেমে মেট্রোতে উঠলে যানজট এড়ানো যায়। কোন বাস পাবেন দেখতে নিচে "বাস ইন্টারচেঞ্জ" স্টেশনে ট্যাপ করুন।',
     gmapsBtn: 'Google Maps-এ খুলুন (লাইভ ট্রাফিক)', busesFromHere: 'এখান থেকে যেসব বাস ধরতে পারবেন', setFromBtn: 'From হিসেবে নিন', fromSet: 'From সেট হয়েছে: ',
     liveBtn: 'লাইভ যাত্রা', liveNext: 'পরের স্টপ', liveLeft: 'টা স্টপ বাকি', liveAway: 'দূরে', liveArrived: 'আপনি গন্তব্যে পৌঁছে গেছেন!', liveChange: 'এখানে বদলান — ধরুন', liveGpsWait: 'GPS-এর জন্য অপেক্ষা করা হচ্ছে… যাত্রার সময় পেজটা খোলা রাখুন।', liveTracking: 'GPS tracking চলছে — stop পেরোলেই ✓ হয়ে যাবে।', liveManual: 'GPS off বা পাওয়া যাচ্ছে না — কোনো স্টপে পৌঁছালে সেটায় tap করে ✓ দিন।', liveEnd: 'যাত্রা শেষ', allStops: 'সব স্টপেজ',
+    tapStopsHint: 'যে স্টপ থেকে উঠবেন সেটায় tap করুন, তারপর যেখানে নামবেন সেটায় tap করুন।', boardTag: 'উঠবো', alightTag: 'নামবো', startTripBtn: 'লাইভ যাত্রা শুরু করুন', recenterMe: 'আমার অবস্থানে ফিরুন',
     interchange: 'বাস ইন্টারচেঞ্জ',
     reportTitle: 'রিপোর্ট ও পরামর্শ', reportSub: 'তথ্য ঠিক রাখতে সাহায্য করুন', reportType: 'রিপোর্টের ধরন',
     rtWrong: 'ভুল রুট তথ্য', rtBus: 'বাস নেই', rtStop: 'স্টপ নেই', rtOther: 'অন্যান্য',
@@ -1284,6 +1308,14 @@ $('liveStops').addEventListener('click', e => {
   if (live.passed >= live.stops.length - 1 && !live.arrived) { live.arrived = true; toast(S().liveArrived); if (navigator.vibrate) navigator.vibrate(200); }
   renderLive();
 });
+$('liveRecenter').addEventListener('click', () => {
+  if (!liveMapObj || !live) return;
+  if (userLoc) liveMapObj.flyTo(userLoc, Math.max(liveMapObj.getZoom(), 16), { duration: REDUCED ? 0 : 0.8 });
+  else drawLiveMap(true);
+});
+$('mapRecenter').addEventListener('click', () => { if (mapJourney) showMap(mapJourney); });
+$('liveRecenter').title = S().recenterMe;
+$('mapRecenter').title = S().recenterMe;
 
 /* ---------- bus directory ---------- */
 function renderDirectory(filter) {
@@ -1291,14 +1323,16 @@ function renderDirectory(filter) {
   const q = (filter || '').trim().toLowerCase();
   const list = BUSES.filter(b => (!q || b.name.toLowerCase().includes(q)) && (dirAc === 'all' || (dirAc === 'ac' ? b.type === 'AC' : b.type !== 'AC')));
   $('busList').innerHTML = list.length ? list.map(b => {
-    const stops = b.stops.map((st, i) => (i ? '<span class="arrw">→</span>' : '') + '<span class="stp"><i></i>' + esc(stopName(st)) + '</span>').join('');
+    const stops = b.stops.map((st, i) => '<div class="dir-stop" data-i="' + i + '"><span class="ld"></span><span class="lname">' + esc(stopName(st)) + '</span><span class="dtag"></span></div>').join('');
     return '<div class="bus-row"><button type="button" class="bus-head">' +
       '<span style="font-size:19px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
       '<span class="broute">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + ' · ' + fmtN(b.stops.length) + ' ' + esc(s.stopsWord) + '</span></span>' +
       '<span class="type-chip">' + esc(typeLabel(b.type)) + '</span><span class="chev">▾</span></button>' +
       '<div class="bus-detail"><div class="bus-detail-in">' +
       '<div class="info-chips"><span>🕐 ' + esc(s.firstBus) + ': ' + esc(fmtN(b.first || '')) + '</span><span>🕙 ' + esc(s.lastBus) + ': ' + esc(fmtN(b.last || '')) + '</span><span>⏱ ' + esc(s.every) + ' ' + esc(fmtN(b.freq || '')) + '</span></div>' +
-      '<div class="stop-strip">' + stops + '</div>' +
+      '<p class="dir-hint">' + esc(s.tapStopsHint) + '</p>' +
+      '<div class="dir-route" data-bus="' + esc(b.name) + '"><div class="lt-track"><i></i></div>' + stops + '</div>' +
+      '<button type="button" class="dir-start" disabled>▶ ' + esc(s.startTripBtn) + '</button>' +
       '</div></div></div>';
   }).join('') : '<div class="no-result">😕 ' + esc(s.noBusVia) + '</div>';
   $('busList').querySelectorAll('.bus-head').forEach(h => h.addEventListener('click', () => {
@@ -1308,6 +1342,81 @@ function renderDirectory(filter) {
   }));
 }
 $('busFilter').addEventListener('input', e => renderDirectory(e.target.value));
+
+/* directory: tap two stops (board → alight) and start a live trip on that bus */
+function dirSel(route) {
+  const b = route.dataset.board, a = route.dataset.alight;
+  return { board: b === undefined || b === '' ? null : +b, alight: a === undefined || a === '' ? null : +a };
+}
+function paintDirRoute(route) {
+  const s = S();
+  const { board, alight } = dirSel(route);
+  const rows = route.querySelectorAll('.dir-stop');
+  rows.forEach(r => {
+    const i = +r.dataset.i;
+    r.classList.toggle('sel-board', i === board);
+    r.classList.toggle('sel-alight', i === alight);
+    r.querySelector('.dtag').textContent = i === board ? s.boardTag : i === alight ? s.alightTag : '';
+  });
+  const bar = route.querySelector('.lt-track i');
+  const total = rows.length;
+  if (board !== null && alight !== null && total > 1) {
+    const lo = Math.min(board, alight), hi = Math.max(board, alight);
+    bar.style.top = (lo / (total - 1)) * 100 + '%';
+    bar.style.height = ((hi - lo) / (total - 1)) * 100 + '%';
+  } else { bar.style.top = '0%'; bar.style.height = '0%'; }
+  const bus = BUSES.find(b => b.name === route.dataset.bus);
+  const btn = route.closest('.bus-detail-in').querySelector('.dir-start');
+  if (board !== null && alight !== null && bus) {
+    btn.disabled = false;
+    btn.textContent = '▶ ' + s.startTripBtn + ': ' + stopName(bus.stops[board]) + ' → ' + stopName(bus.stops[alight]);
+  } else { btn.disabled = true; btn.textContent = '▶ ' + s.startTripBtn; }
+}
+$('busList').addEventListener('click', e => {
+  const startBtn = e.target.closest('.dir-start');
+  if (startBtn && !startBtn.disabled) { startDirTrip(startBtn); return; }
+  const row = e.target.closest('.dir-stop');
+  if (!row) return;
+  const route = row.closest('.dir-route');
+  const i = +row.dataset.i;
+  let { board, alight } = dirSel(route);
+  if (board === null) board = i;
+  else if (alight === null && i !== board) alight = i;
+  else { board = i; alight = null; }
+  route.dataset.board = board === null ? '' : board;
+  route.dataset.alight = alight === null ? '' : alight;
+  paintDirRoute(route);
+});
+function startDirTrip(btn) {
+  const route = btn.closest('.bus-detail-in').querySelector('.dir-route');
+  const bus = BUSES.find(b => b.name === route.dataset.bus);
+  const svc = SERVICES.find(x => x.kind === 'bus' && x.name === bus.name);
+  const { board, alight } = dirSel(route);
+  if (!svc || board === null || alight === null) return;
+  const leg = legMath(svc, board, alight, { student: student, peak: peak });
+  lastFrom = bus.stops[board];
+  lastTo = bus.stops[alight];
+  startLive({ legs: [leg], transfers: 0, totalFare: leg.fare, totalMin: leg.rideMin + leg.waitMin });
+}
+function gotoBus(name) {
+  $('busFilter').value = '';
+  dirAc = 'all';
+  $('dirAcChips').querySelectorAll('button').forEach(x => x.classList.toggle('active', x.dataset.dac === 'all'));
+  renderDirectory('');
+  for (const r of $('busList').querySelectorAll('.bus-row')) {
+    if (r.querySelector('.bname').textContent === name) {
+      const det = r.querySelector('.bus-detail');
+      r.classList.add('open');
+      det.style.maxHeight = det.scrollHeight + 'px';
+      setTimeout(() => r.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }), 60);
+      break;
+    }
+  }
+}
+$('stopBoardList').addEventListener('click', e => {
+  const row = e.target.closest('.brow[data-bus]');
+  if (row) gotoBus(row.dataset.bus);
+});
 $('dirAcChips').addEventListener('click', e => {
   const b = e.target.closest('button[data-dac]'); if (!b) return;
   dirAc = b.dataset.dac;
@@ -1328,7 +1437,7 @@ function renderBoard() {
   $('stopBoardList').innerHTML = '<p style="font-weight:700;margin-bottom:4px">' + esc(stopName(boardStop)) + ' — ' + fmtN(rows.length) + ' ' + esc(s.busesVia) + '</p>' +
     rows.map(b => {
       const idx = b.stops.indexOf(boardStop);
-      return '<div class="brow"><span style="font-size:18px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
+      return '<div class="brow" data-bus="' + esc(b.name) + '"><span style="font-size:18px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
         '<div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span>' +
         '<span class="pos">' + esc(s.stopWord) + ' ' + fmtN(idx + 1) + '/' + fmtN(b.stops.length) + '</span></div>';
     }).join('');
@@ -1354,6 +1463,8 @@ function renderMetro() {
   }).join('');
 }
 $('metroTimeline').addEventListener('click', e => {
+  const brow = e.target.closest('.brow[data-bus]');
+  if (brow) { gotoBus(brow.dataset.bus); return; }
   const sf = e.target.closest('[data-setfrom]');
   if (sf) {
     const stop = sf.dataset.setfrom;
@@ -1370,7 +1481,7 @@ $('metroTimeline').addEventListener('click', e => {
     const bs = stationBusStop(row.dataset.station);
     const rows = BUSES.filter(b => b.stops.includes(bs));
     det.querySelector('.mdetail-in').innerHTML = '<p style="font-weight:700;margin-bottom:2px">' + esc(S().busesFromHere) + ' — ' + esc(stopName(bs)) + ' (' + fmtN(rows.length) + ')</p>' +
-      rows.map(b => '<div class="brow"><span style="font-size:18px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span><div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span><span class="type-chip">' + esc(typeLabel(b.type)) + '</span></div>').join('') +
+      rows.map(b => '<div class="brow" data-bus="' + esc(b.name) + '"><span style="font-size:18px">🚌</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span><div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span><span class="type-chip">' + esc(typeLabel(b.type)) + '</span></div>').join('') +
       '<button type="button" class="setfrom-btn" data-setfrom="' + esc(bs) + '">' + esc(S().setFromBtn) + '</button>';
     det.dataset.filled = '1';
   }
