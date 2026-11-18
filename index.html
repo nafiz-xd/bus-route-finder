@@ -201,6 +201,15 @@ section.block{margin-top:30px}
 .live-stop .ltag{margin-left:auto;font-size:11px;font-weight:800;background:#fdeeda;color:#9a6206;padding:3px 8px;border-radius:999px}
 [data-theme="dark"] .live-stop .ltag{background:#3a2c10;color:#ffd98a}
 .live-hint{color:var(--muted);font-size:13px;margin-top:8px;font-weight:600}
+.live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff3b30;margin-right:7px;vertical-align:2px;box-shadow:0 0 8px 2px rgba(255,59,48,.55);animation:liveDotPulse 1.6s ease-in-out infinite}
+@keyframes liveDotPulse{0%,100%{box-shadow:0 0 6px 1px rgba(255,59,48,.45)}50%{box-shadow:0 0 13px 5px rgba(255,59,48,.8)}}
+#liveClose{background:rgba(255,59,48,.13);color:#ff5147;border:1.5px solid rgba(255,59,48,.5);border-radius:999px;padding:7px 15px;font-size:13px;font-weight:800;cursor:pointer;transition:.2s;flex:none;font-family:inherit}
+#liveClose:hover{background:rgba(255,59,48,.22)}
+#liveClose:active{transform:scale(.94)}
+#liveStops{position:relative}
+.lt-track{position:absolute;left:10.5px;top:16px;bottom:16px;width:3px;background:var(--border);border-radius:99px;transform:translateX(-50%);z-index:0}
+.lt-track i{display:block;width:100%;background:linear-gradient(180deg,#13a354,var(--green));border-radius:99px;transition:height .6s ease;box-shadow:0 0 7px rgba(14,122,61,.55)}
+.live-stop{position:relative;z-index:1}
 .j-actions button:hover{border-color:var(--green);color:var(--green)}
 .j-actions button:active{transform:scale(.95)}
 .j-actions button.saved{border-color:var(--amber);background:#fff8ea;color:#9a6206}
@@ -1193,7 +1202,7 @@ function startLive(jn) {
   });
   live = { stops: stops, passed: 0, watchId: null, arrived: false, notedTransfer: -1, lastDist: null, gpsOn: false };
   $('livePanel').classList.add('show');
-  $('liveTitle').textContent = '🔴 ' + s.liveBtn + ': ' + stopName(lastFrom) + ' → ' + stopName(lastTo);
+  $('liveTitle').innerHTML = '<span class="live-dot"></span>' + esc(s.liveBtn) + ': ' + esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo));
   $('liveClose').textContent = '✕ ' + s.liveEnd;
   $('liveHint').textContent = s.liveGpsWait;
   renderLive();
@@ -1207,7 +1216,8 @@ function renderLive() {
   if (!live) return;
   const s = S();
   const total = live.stops.length;
-  $('liveStops').innerHTML = live.stops.map((st, i) => {
+  const fillPct = total > 1 ? (live.passed / (total - 1)) * 100 : 100;
+  $('liveStops').innerHTML = '<div class="lt-track"><i style="height:' + fillPct + '%"></i></div>' + live.stops.map((st, i) => {
     const cls = i <= live.passed ? 'done' : (i === live.passed + 1 ? 'next' : '');
     const tag = st.transfer ? '<span class="ltag">⇄ ' + esc(st.service) + '</span>' : '';
     return '<div class="live-stop ' + cls + '" data-i="' + i + '"><span class="ld">' + (i <= live.passed ? '✓' : '') + '</span><span class="lname">' + esc(stopName(st.name)) + '</span>' + tag + '</div>';
