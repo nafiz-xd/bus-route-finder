@@ -116,20 +116,20 @@
 <script>
 /* ================= DATA: Dhaka local bus services ================= */
 const BUSES = [
-  { name:"Raida", stops:["Abdullahpur","Uttara","Airport","Khilkhet","Kuril Bishwa Road","Notun Bazar","Badda","Rampura","Malibagh","Moghbazar","Kakrail","Paltan","Gulistan","Motijheel"] },
+  { name:"Raida", stops:["Abdullahpur","Uttara","Airport","Khilkhet","Kuril Bishwa Road","Notun Bazar","Gulshan","Badda","Rampura","Malibagh","Moghbazar","Kakrail","Paltan","Gulistan","Motijheel"] },
   { name:"Victor Paribahan", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Agargaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Paltan","Gulistan","Motijheel"] },
   { name:"Akash", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari"] },
   { name:"Shadhin", stops:["Shyamoli","Mohammadpur","Dhanmondi","Science Lab","Elephant Road","Shahbagh","Press Club","Paltan","Gulistan","Motijheel"] },
   { name:"Midline", stops:["Gabtoli","Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Tejgaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Gulistan","Motijheel"] },
   { name:"Trans Silva", stops:["Mirpur 1","Gabtoli","Technical","Kalyanpur","Shyamoli","Mohammadpur","Dhanmondi","Science Lab","New Market","Azimpur"] },
-  { name:"Labbaik", stops:["Tongi","Abdullahpur","Uttara","Airport","Kuril Bishwa Road","Banani","Mohakhali","Agargaon","Shewrapara","Kazipara","Mirpur 10","Mirpur 1","Gabtoli"] },
+  { name:"Labbaik", stops:["Tongi","Abdullahpur","Uttara","Airport","Kuril Bishwa Road","Banani","Gulshan","Mohakhali","Agargaon","Shewrapara","Kazipara","Mirpur 10","Mirpur 1","Gabtoli"] },
   { name:"Mirpur Metro", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Karwan Bazar","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari"] },
-  { name:"BRTC", stops:["Abdullahpur","Uttara","Airport","Banani","Mohakhali","Tejgaon","Farmgate","Shahbagh","Press Club","Gulistan","Motijheel"] },
+  { name:"BRTC", stops:["Abdullahpur","Uttara","Airport","Banani","Gulshan","Mohakhali","Tejgaon","Farmgate","Shahbagh","Press Club","Gulistan","Motijheel"] },
   { name:"Asmani", stops:["Azimpur","New Market","Science Lab","Dhanmondi","Mohammadpur","Shyamoli","Kalyanpur","Technical","Gabtoli","Mirpur 1","Mirpur 10","Pallabi"] },
-  { name:"Ramjan", stops:["Mohammadpur","Shyamoli","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Badda","Rampura","Malibagh","Khilgaon","Basabo","Sayedabad"] },
-  { name:"Turag", stops:["Tongi","Abdullahpur","Uttara","Airport","Banani","Mohakhali","Tejgaon","Farmgate","Shahbagh","Science Lab","New Market","Azimpur"] },
+  { name:"Ramjan", stops:["Mohammadpur","Shyamoli","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Gulshan","Badda","Rampura","Malibagh","Khilgaon","Basabo","Sayedabad"] },
+  { name:"Turag", stops:["Tongi","Abdullahpur","Uttara","Airport","Banani","Gulshan","Mohakhali","Tejgaon","Farmgate","Shahbagh","Science Lab","New Market","Azimpur"] },
   { name:"Projapoti", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Agargaon","Farmgate","Karwan Bazar","Moghbazar","Malibagh","Khilgaon","Basabo","Sayedabad","Jatrabari"] },
-  { name:"Alif", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Badda","Rampura"] },
+  { name:"Alif", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Mohakhali","Banani","Kuril Bishwa Road","Notun Bazar","Gulshan","Badda","Rampura"] },
   { name:"Bhuiyan", stops:["Gabtoli","Technical","Kalyanpur","Shyamoli","Mohammadpur","Dhanmondi","Science Lab","Shahbagh","Press Club","Paltan","Gulistan","Sayedabad","Jatrabari"] },
   { name:"Safa Marwa", stops:["Mirpur 1","Mirpur 10","Kazipara","Shewrapara","Agargaon","Farmgate","Shahbagh","Press Club","Gulistan","Sayedabad","Jatrabari","Sign Board"] }
 ];
@@ -141,8 +141,15 @@ $('stopList').innerHTML = allStops.map(s => `<option value="${s}">`).join('');
 
 function matchStop(text){
   if(!text) return null;
-  const t = text.trim().toLowerCase();
-  return allStops.find(s => s.toLowerCase() === t) || null;
+  const t = text.trim().toLowerCase().replace(/\s+/g,' ');
+  if(!t) return null;
+  const exact = allStops.find(s => s.toLowerCase() === t);
+  if(exact) return exact;
+  const starts = allStops.filter(s => s.toLowerCase().startsWith(t));
+  if(starts.length === 1) return starts[0];
+  const contains = allStops.filter(s => s.toLowerCase().includes(t));
+  if(contains.length === 1) return contains[0];
+  return null;
 }
 function estimateFare(segments){
   const distanceKm = segments * 1.1;
@@ -156,7 +163,9 @@ function doSearch(){
   const from = matchStop(fromRaw), to = matchStop(toRaw);
   const box = $('results');
   if(!from || !to){
-    box.innerHTML = `<div class="no-result">⚠️ Please pick both a <strong>From</strong> and a <strong>To</strong> place from the suggestion list.</div>`;
+    const bad = !from ? fromRaw : toRaw;
+    const which = !from ? 'From' : 'To';
+    box.innerHTML = `<div class="no-result">⚠️ The ${which} place <strong>"${bad || ''}"</strong> is not in the stop list yet. Please pick a place from the suggestions while typing.</div>`;
     return;
   }
   if(from === to){
