@@ -34,7 +34,7 @@ window.BUS_DATA = {
         "Hazipara",
         "Malibagh",
         "Mouchak",
-        "Moghbazar Wireless",
+        "Wireless",
         "Moghbazar",
         "Eskaton",
         "Kakrail",
@@ -1718,14 +1718,17 @@ window.BUS_DATA = {
     ],
     "interchange": [
       "Pallabi",
+      "Mirpur 11",
       "Mirpur 10",
       "Kazipara",
       "Shewrapara",
       "Agargaon",
+      "Bijoy Sarani",
       "Farmgate",
       "Karwan Bazar",
       "Shahbagh",
       "Motijheel",
+      "Kamalapur",
       "Uttara"
     ]
   },
@@ -2093,10 +2096,6 @@ window.BUS_DATA = {
     "Mirpur 2": [
       23.8032,
       90.36
-    ],
-    "Moghbazar Wireless": [
-      23.7492,
-      90.4062
     ],
     "Mouchak": [
       23.7468,
@@ -2555,7 +2554,6 @@ window.BUS_DATA = {
     "Merul Badda": "মেরুল বাড্ডা",
     "Mill Gate": "মিল গেট",
     "Mirpur 2": "মিরপুর ২",
-    "Moghbazar Wireless": "মগবাজার ওয়্যারলেস",
     "Mouchak": "মৌচাক",
     "Nabisco": "নাবিস্কো",
     "Nadda": "নদ্দা",
