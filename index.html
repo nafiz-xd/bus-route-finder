@@ -1194,9 +1194,8 @@ $('resetBtn').addEventListener('click', () => {
 });
 syncToggles();
 
-if (!store.get('nearSeen')) $('nearBtn').classList.add('hint');
+$('nearBtn').classList.add('hint');
 $('nearBtn').addEventListener('click', () => {
-  $('nearBtn').classList.remove('hint'); store.set('nearSeen', 1);
   const s = S();
   if (!navigator.geolocation) { toast(s.geoNA); return; }
   const btn = $('nearBtn'); btn.disabled = true; btn.classList.add('busy');
