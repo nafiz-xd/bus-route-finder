@@ -1564,7 +1564,7 @@ function renderDirectory(filter) {
       '<div class="bus-detail"><div class="bus-detail-in">' +
       '<div class="info-chips"><span>🕐 ' + esc(s.firstBus) + ': ' + esc(fmtN(b.first || '')) + '</span><span>🕙 ' + esc(s.lastBus) + ': ' + esc(fmtN(b.last || '')) + '</span><span>⏱ ' + esc(s.every) + ' ' + esc(fmtN(b.freq || '')) + '</span></div>' +
       '<p class="dir-hint">' + esc(s.tapStopsHint) + '</p>' +
-      '<div class="dir-route" data-bus="' + esc(b.name) + '"><div class="lt-track"><i></i></div>' + stops + '</div>' +
+      '<div class="dir-route" data-bus="' + esc(b.name) + '" data-bidx="' + BUSES.indexOf(b) + '"><div class="lt-track"><i></i></div>' + stops + '</div>' +
       '<button type="button" class="dir-start" disabled>▶ ' + esc(s.startTripBtn) + '</button>' +
       '</div></div></div>';
   }).join('') : '<div class="no-result">😕 ' + esc(s.noBusVia) + '</div>';
@@ -1598,7 +1598,7 @@ function paintDirRoute(route) {
     bar.style.top = (lo / (total - 1)) * 100 + '%';
     bar.style.height = ((hi - lo) / (total - 1)) * 100 + '%';
   } else { bar.style.top = '0%'; bar.style.height = '0%'; }
-  const bus = BUSES.find(b => b.name === route.dataset.bus);
+  const bus = BUSES[+route.dataset.bidx] || BUSES.find(b => b.name === route.dataset.bus);
   const btn = route.closest('.bus-detail-in').querySelector('.dir-start');
   if (board !== null && alight !== null && bus) {
     btn.disabled = false;
@@ -1622,8 +1622,8 @@ $('busList').addEventListener('click', e => {
 });
 function startDirTrip(btn) {
   const route = btn.closest('.bus-detail-in').querySelector('.dir-route');
-  const bus = BUSES.find(b => b.name === route.dataset.bus);
-  const svc = SERVICES.find(x => x.kind === 'bus' && x.name === bus.name);
+  const bus = BUSES[+route.dataset.bidx] || BUSES.find(b => b.name === route.dataset.bus);
+  const svc = SERVICES[+route.dataset.bidx] || SERVICES.find(x => x.kind === 'bus' && x.name === bus.name);
   const { board, alight } = dirSel(route);
   if (!svc || board === null || alight === null) return;
   const leg = legMath(svc, board, alight, { student: student, peak: peak });
@@ -1631,14 +1631,16 @@ function startDirTrip(btn) {
   lastTo = bus.stops[alight];
   startLive({ legs: [leg], transfers: 0, totalFare: leg.fare, totalMin: leg.rideMin + leg.waitMin });
 }
-function gotoBus(name) {
+function gotoBus(x) {
   switchView('buses');
   $('busFilter').value = '';
   dirAc = 'all';
   $('dirAcChips').querySelectorAll('button').forEach(x => x.classList.toggle('active', x.dataset.dac === 'all'));
   renderDirectory('');
   for (const r of $('busList').querySelectorAll('.bus-row')) {
-    if (r.querySelector('.bname').textContent === name) {
+    const rt = r.querySelector('.dir-route');
+    const match = typeof x === 'number' ? (rt && +rt.dataset.bidx === x) : (r.querySelector('.bname').textContent === x);
+    if (match) {
       const det = r.querySelector('.bus-detail');
       r.classList.add('open');
       det.style.maxHeight = det.scrollHeight + 'px';
@@ -1649,7 +1651,7 @@ function gotoBus(name) {
 }
 $('stopBoardList').addEventListener('click', e => {
   const row = e.target.closest('.brow[data-bus]');
-  if (row) gotoBus(row.dataset.bus);
+  if (row) gotoBus(row.dataset.bidx !== undefined ? +row.dataset.bidx : row.dataset.bus);
 });
 $('dirAcChips').addEventListener('click', e => {
   const b = e.target.closest('button[data-dac]'); if (!b) return;
@@ -1671,7 +1673,7 @@ function renderBoard() {
   $('stopBoardList').innerHTML = '<p style="font-weight:700;margin-bottom:4px">' + esc(stopName(boardStop)) + ' — ' + fmtN(rows.length) + ' ' + esc(s.busesVia) + '</p>' +
     rows.map(b => {
       const idx = b.stops.indexOf(boardStop);
-      return '<div class="brow" data-bus="' + esc(b.name) + '"><span>' + BUS_ICON + '</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
+      return '<div class="brow" data-bus="' + esc(b.name) + '" data-bidx="' + BUSES.indexOf(b) + '"><span>' + BUS_ICON + '</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
         '<div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span>' +
         '<span class="pos">' + esc(s.stopWord) + ' ' + fmtN(idx + 1) + '/' + fmtN(b.stops.length) + '</span></div>';
     }).join('');
@@ -1698,7 +1700,7 @@ function renderMetro() {
 }
 $('metroTimeline').addEventListener('click', e => {
   const brow = e.target.closest('.brow[data-bus]');
-  if (brow) { gotoBus(brow.dataset.bus); return; }
+  if (brow) { gotoBus(brow.dataset.bidx !== undefined ? +brow.dataset.bidx : brow.dataset.bus); return; }
   const sf = e.target.closest('[data-setfrom]');
   if (sf) {
     switchView('home');
@@ -1716,7 +1718,7 @@ $('metroTimeline').addEventListener('click', e => {
     const bs = stationBusStop(row.dataset.station);
     const rows = BUSES.filter(b => b.stops.includes(bs));
     det.querySelector('.mdetail-in').innerHTML = '<p style="font-weight:700;margin-bottom:2px">' + esc(S().busesFromHere) + ' — ' + esc(stopName(bs)) + ' (' + fmtN(rows.length) + ')</p>' +
-      rows.map(b => '<div class="brow" data-bus="' + esc(b.name) + '"><span>' + BUS_ICON + '</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span><div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span><span class="type-chip">' + esc(typeLabel(b.type)) + '</span></div>').join('') +
+      rows.map(b => '<div class="brow" data-bus="' + esc(b.name) + '" data-bidx="' + BUSES.indexOf(b) + '"><span>' + BUS_ICON + '</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span><div class="bmeta">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + '</div></span><span class="type-chip">' + esc(typeLabel(b.type)) + '</span></div>').join('') +
       '<button type="button" class="setfrom-btn" data-setfrom="' + esc(bs) + '">' + esc(S().setFromBtn) + '</button>';
     det.dataset.filled = '1';
   }
@@ -1818,6 +1820,12 @@ function applyLang(skipStats) {
   updShotBox();
   if (boardStop) renderBoard();
   if (lastFrom) renderResults();
+  if (typeof live !== 'undefined' && live) {
+    $('liveTitle').innerHTML = '<span class="live-dot"></span>' + esc(s.liveBtn) + ': ' + esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo));
+    $('liveClose').textContent = '✕ ' + s.liveEnd;
+    if (live.gpsOn) $('liveHint').textContent = s.liveTracking;
+    renderLive();
+  }
   requestAnimationFrame(placeSwap);
 }
 $('langBtn').addEventListener('click', () => {

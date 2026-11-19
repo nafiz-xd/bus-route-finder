@@ -1,5 +1,5 @@
 /* Dhaka Bus Route Finder — service worker (app shell cache) */
-const CACHE = 'brf-v37';
+const CACHE = 'brf-v38';
 const SHELL = ['./', 'index.html', 'routes.js', 'manifest.json', 'icon-192.png', 'icon-512.png', 'hero.jpg', 'search.jpg', 'fonts/bndigits.woff2'];
 
 self.addEventListener('install', e => {
