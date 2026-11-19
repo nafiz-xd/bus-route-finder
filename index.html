@@ -98,6 +98,11 @@ main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
 #nearBtn:hover{background:var(--green-light)}
 [data-theme="dark"] #nearBtn{color:#8fe3ae}
 #nearBtn:active{transform:translateY(-50%) scale(.92)}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1.5px solid var(--border);border-radius:14px;box-shadow:var(--shadow);max-height:264px;overflow-y:auto;z-index:80;padding:6px}
+.sugg[hidden]{display:none}
+.sugg-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:11px 12px;border:none;background:transparent;color:var(--text);font:inherit;font-weight:600;border-radius:10px;cursor:pointer}
+.sugg-item small{color:var(--muted);font-weight:500;font-size:12px;white-space:nowrap}
+.sugg-item:hover,.sugg-item.active{background:var(--green-light)}
 #nearBtn.busy svg{animation:nearPulse 1s ease-in-out infinite}
 #nearBtn.hint::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--green);animation:nearHint 1.8s ease-out infinite;pointer-events:none}
 @keyframes nearHint{0%{transform:scale(.75);opacity:.9}70%{transform:scale(1.45);opacity:0}100%{transform:scale(1.45);opacity:0}}
@@ -477,15 +482,17 @@ footer b{color:var(--text)}
         <label for="fromInput" data-i18n="fromLabel">From</label>
         <div class="inwrap">
           <span class="dot-ic"></span>
-          <input id="fromInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
+          <input id="fromInput" type="text" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
           <button id="nearBtn" type="button" aria-label="Near me" title="Near me"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><path d="M12 2.6v2.9M12 18.5v2.9M2.6 12h2.9M18.5 12h2.9"/></svg></button>
+          <div class="sugg" id="fromSugg" hidden></div>
         </div>
       </div>
       <div class="field">
         <label for="toInput" data-i18n="toLabel">To</label>
         <div class="inwrap">
           <span class="dot-ic to"></span>
-          <input id="toInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="toPh" placeholder="To — where do you want to go?">
+          <input id="toInput" type="text" autocomplete="off" data-i18n-ph="toPh" placeholder="To — where do you want to go?">
+          <div class="sugg" id="toSugg" hidden></div>
         </div>
       </div>
       <button id="swapBtn" type="button" aria-label="Swap from and to">⇅</button>
@@ -614,7 +621,8 @@ footer b{color:var(--text)}
         <label for="stopInput" data-i18n="pickStop">Pick a stop</label>
         <div class="inwrap">
           <span class="dot-ic"></span>
-          <input id="stopInput" type="text" list="stopList" autocomplete="off" data-i18n-ph="pickStopPh" placeholder="Start typing a stop name…">
+          <input id="stopInput" type="text" autocomplete="off" data-i18n-ph="pickStopPh" placeholder="Start typing a stop name…">
+          <div class="sugg" id="stopSugg" hidden></div>
         </div>
       </div>
       <div class="board-list" id="stopBoardList">
@@ -1016,6 +1024,54 @@ $('stopList').innerHTML = ALL_STOPS.map(s => '<option value="' + esc(lang === 'b
 function refreshDatalist() {
   $('stopList').innerHTML = ALL_STOPS.map(s => '<option value="' + esc(lang === 'bn' ? (STOP_BN[s] || s) : s) + '">').join('');
 }
+
+/* ---------- custom autocomplete (native datalist does not open on iOS) ---------- */
+function attachSugg(input, box, onPick) {
+  let items = [], active = -1, suppress = false;
+  const close = () => { box.hidden = true; items = []; active = -1; };
+  function pick(en) {
+    suppress = true;
+    input.value = stopName(en);
+    close();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    if (onPick) onPick(en);
+  }
+  function render() {
+    if (suppress) { suppress = false; return; }
+    const q = input.value.trim().toLowerCase();
+    const pool = ALL_STOPS.map(en => ({ en, disp: stopName(en), alt: lang === 'bn' ? en : (STOP_BN[en] || en) }));
+    let m;
+    if (!q) m = pool.slice().sort((a, b) => a.disp.localeCompare(b.disp)).slice(0, 12);
+    else {
+      const starts = [], cont = [];
+      for (const it of pool) {
+        const a = it.en.toLowerCase(), b = (STOP_BN[it.en] || '').toLowerCase(), d = it.disp.toLowerCase();
+        if (a.startsWith(q) || b.startsWith(q) || d.startsWith(q)) starts.push(it);
+        else if (a.includes(q) || b.includes(q) || d.includes(q)) cont.push(it);
+      }
+      m = starts.concat(cont).slice(0, 8);
+    }
+    if (!m.length) { close(); return; }
+    items = m; active = -1;
+    box.innerHTML = m.map(it => '<button type="button" class="sugg-item" data-en="' + esc(it.en) + '"><span>' + esc(it.disp) + '</span><small>' + esc(it.alt) + '</small></button>').join('');
+    box.hidden = false;
+    box.querySelectorAll('.sugg-item').forEach(btn => btn.addEventListener('mousedown', e => { e.preventDefault(); pick(btn.dataset.en); }));
+  }
+  function mark() { box.querySelectorAll('.sugg-item').forEach((el, i) => el.classList.toggle('active', i === active)); }
+  input.addEventListener('input', render);
+  input.addEventListener('focus', render);
+  input.addEventListener('blur', () => setTimeout(close, 150));
+  input.addEventListener('keydown', e => {
+    if (box.hidden) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length; mark(); }
+    else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); e.stopPropagation(); pick(items[active].en); }
+    else if (e.key === 'Escape') { close(); }
+  }, true);
+}
+attachSugg($('fromInput'), $('fromSugg'), () => { const t = $('toInput'); if (!t.value) t.focus(); });
+attachSugg($('toInput'), $('toSugg'));
+attachSugg($('stopInput'), $('stopSugg'));
 
 /* ---------- stats counters ---------- */
 (function counters() {
