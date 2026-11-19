@@ -659,6 +659,52 @@ window.BUS_DATA = {
       ]
     },
     {
+      "name": "Anabil Super",
+      "type": "Non-AC",
+      "first": "6:00 AM",
+      "last": "11:30 PM",
+      "freq": "10\u201315 min",
+      "stops": [
+        "Sign Board",
+        "Shonir Akhra",
+        "Jatrabari",
+        "Sayedabad",
+        "Manik Nagar",
+        "Mugda",
+        "Mugda Medical",
+        "Basabo",
+        "Khilgaon",
+        "Malibagh Railgate",
+        "Hazipara",
+        "Rampura",
+        "Rampura Bridge",
+        "Merul",
+        "Madhya Badda",
+        "Badda",
+        "Uttar Badda",
+        "Shahjadpur",
+        "Bashtola",
+        "Notun Bazar",
+        "Nadda",
+        "Bashundhara",
+        "Jamuna Future Park",
+        "Kuril Bishwa Road",
+        "Khilkhet",
+        "Airport",
+        "Jasimuddin",
+        "Rajlakshmi",
+        "Azampur",
+        "House Building",
+        "Abdullahpur",
+        "Tongi",
+        "Station Road",
+        "Mill Gate",
+        "Board Bazar",
+        "Gazipur Bypass",
+        "Gazipur Chourasta"
+      ]
+    },
+    {
       "name": "Supravat",
       "type": "Non-AC",
       "first": "5:30 AM",
@@ -1742,6 +1788,10 @@ window.BUS_DATA = {
       23.8822,
       90.402
     ],
+    "Uttar Badda": [
+      23.7845,
+      90.4262
+    ],
     "Uttara": [
       23.8653,
       90.3854
@@ -1913,6 +1963,14 @@ window.BUS_DATA = {
     "Mohammadpur": [
       23.7658,
       90.3583
+    ],
+    "Gazipur Bypass": [
+      23.962,
+      90.402
+    ],
+    "Gazipur Chourasta": [
+      23.9935,
+      90.4085
     ],
     "Gazipur": [
       23.9883,
@@ -2390,6 +2448,10 @@ window.BUS_DATA = {
       23.706,
       90.439
     ],
+    "Merul": [
+      23.7665,
+      90.4242
+    ],
     "Madhya Badda": [
       23.772,
       90.4255
@@ -2473,6 +2535,7 @@ window.BUS_DATA = {
   },
   "stopBn": {
     "Abdullahpur": "আব্দুল্লাহপুর",
+    "Uttar Badda": "উত্তর বাড্ডা",
     "Uttara": "উত্তরা",
     "Airport": "এয়ারপোর্ট",
     "Khilkhet": "খিলক্ষেত",
@@ -2516,6 +2579,8 @@ window.BUS_DATA = {
     "Basabo": "বাসাবো",
     "Sign Board": "সাইন বোর্ড",
     "Mohammadpur": "মোহাম্মদপুর",
+    "Gazipur Bypass": "গাজীপুর বাইপাস",
+    "Gazipur Chourasta": "গাজীপুর চৌরাস্তা",
     "Gazipur": "গাজীপুর",
     "Board Bazar": "বোর্ড বাজার",
     "Sadarghat": "সদরঘাট",
@@ -2635,6 +2700,7 @@ window.BUS_DATA = {
     "Hatirjheel": "হাতিরঝিল",
     "Ittefaq Mor": "ইত্তেফাক মোড়",
     "Kajla": "কাজলা",
+    "Merul": "মেরুল",
     "Madhya Badda": "মধ্য বাড্ডা",
     "Manik Nagar": "মানিক নগর",
     "Masdair": "মাসদাইর",
