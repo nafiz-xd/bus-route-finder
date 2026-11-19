@@ -383,6 +383,7 @@ window.BUS_DATA = {
         "Malibagh",
         "Khilgaon",
         "Basabo",
+        "Mugda Medical",
         "Mugda",
         "Manik Nagar",
         "Sayedabad"
@@ -458,7 +459,9 @@ window.BUS_DATA = {
         "Tilpapara",
         "Khilgaon",
         "Basabo",
+        "Mugda Medical",
         "Mugda",
+        "Manik Nagar",
         "Sayedabad",
         "Jatrabari"
       ]
@@ -980,7 +983,9 @@ window.BUS_DATA = {
         "Tilpapara",
         "Khilgaon",
         "Basabo",
+        "Mugda Medical",
         "Mugda",
+        "Manik Nagar",
         "Sayedabad",
         "Jatrabari"
       ]
@@ -2253,6 +2258,10 @@ window.BUS_DATA = {
       23.7271,
       90.4279
     ],
+    "Mugda Medical": [
+      23.7283,
+      90.4258
+    ],
     "Nabinagar": [
       23.885,
       90.256
@@ -2593,6 +2602,7 @@ window.BUS_DATA = {
     "Khilgaon Railgate": "খিলগাঁও রেলগেট",
     "Mazar Road": "মাজার রোড",
     "Mugda": "মুগদা",
+    "Mugda Medical": "মুগদা মেডিকেল",
     "Nabinagar": "নবীনগর",
     "Radio Colony": "রেডিও কলোনি",
     "Rajarbagh": "রাজারবাগ",
