@@ -347,7 +347,7 @@ section.block{margin-top:30px}
 .bus-row.open{box-shadow:var(--shadow-sm)}
 .bus-head{width:100%;border:none;background:none;display:flex;align-items:center;gap:10px;padding:13px 15px;text-align:left;color:var(--text)}
 .bus-head .bname{font-weight:800;font-size:15.5px}
-.bus-head .broute{color:var(--muted);font-size:12.5px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44vw}
+.bus-head .broute{color:var(--muted);font-size:12.5px;font-weight:600;display:block;line-height:1.4}
 .bus-head .chev{margin-left:auto;color:var(--muted);transition:transform .35s;font-size:15px;flex:none}
 .bus-row.open .chev{transform:rotate(180deg)}
 .bus-detail{max-height:0;overflow:hidden;transition:max-height .5s ease}
@@ -422,7 +422,7 @@ footer b{color:var(--text)}
 
 @media (max-width:560px){
   .appbar .brand small{display:none}
-  .bus-head .broute{max-width:36vw}
+
   #map{height:290px}
   .j-head{padding-right:0}
   .ribbons{position:static;flex-direction:row;margin-bottom:8px}
@@ -1575,7 +1575,7 @@ function renderDirectory(filter) {
   $('busList').innerHTML = list.length ? list.map(b => {
     const stops = b.stops.map((st, i) => '<div class="dir-stop" data-i="' + i + '"><span class="ld"></span><span class="lname">' + esc(stopName(st)) + '</span><span class="dtag"></span></div>').join('');
     return '<div class="bus-row"><button type="button" class="bus-head">' +
-      '<span>' + BUS_ICON + '</span><span style="min-width:0"><span class="bname">' + esc(b.name) + '</span>' +
+      '<span>' + BUS_ICON + '</span><span style="min-width:0;flex:1"><span class="bname">' + esc(b.name) + '</span>' +
       '<span class="broute">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + ' · ' + fmtN(b.stops.length) + ' ' + esc(s.stopsWord) + '</span></span>' +
       '<span class="type-chip">' + esc(typeLabel(b.type)) + '</span><span class="chev">▾</span></button>' +
       '<div class="bus-detail"><div class="bus-detail-in">' +
