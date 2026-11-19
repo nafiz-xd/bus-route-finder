@@ -242,7 +242,7 @@ section.block{margin-top:30px}
 .ls-row.first .ls-dot{background:var(--amber);border-color:var(--amber)}
 .ls-row.last .ls-dot{background:var(--green)}
 .ls-idx{margin-left:auto;color:var(--muted);font-size:12px}
-#livePanel{display:none;margin-top:6px}
+#livePanel{display:none;margin-top:6px;scroll-margin-top:76px}
 #livePanel.show{display:block;animation:fadeUp .4s both}
 #livePanel .card{padding:12px}
 #liveMap{height:260px;border-radius:14px;overflow:hidden;background:var(--surface2)}
@@ -330,7 +330,7 @@ section.block{margin-top:30px}
 @keyframes shimmer{to{background-position:-200% 0}}
 
 /* ---------- map ---------- */
-#mapPanel{display:none;margin-top:6px}
+#mapPanel{display:none;margin-top:6px;scroll-margin-top:76px}
 #mapPanel.show{display:block;animation:fadeUp .4s both}
 #mapPanel .card{padding:10px}
 #map{height:340px;border-radius:12px;z-index:1;background:var(--surface2)}
@@ -514,10 +514,6 @@ footer b{color:var(--text)}
           <span class="switch"><input type="checkbox" id="studentToggle"><span class="track"></span></span>
           <span data-i18n="student">Student half fare</span>
         </label>
-        <div class="seg" role="group" aria-label="Traffic">
-          <button type="button" id="segOff" class="active" data-i18n="offpeak">Off-peak</button>
-          <button type="button" id="segPeak" data-i18n="peak">Peak</button>
-        </div>
       </div>
 
       <div class="toggle-row">
@@ -568,30 +564,12 @@ footer b{color:var(--text)}
             <button type="button" id="sbAcAC" data-i18n="acOnly">AC</button>
             <button type="button" id="sbAcNon" data-i18n="nonAcOnly">Non-AC</button>
           </div>
-          <div class="seg sm" role="group" aria-label="Traffic">
-            <button type="button" id="sbOff" class="active" data-i18n="offpeak">Off-peak</button>
-            <button type="button" id="sbPeak" data-i18n="peak">Peak</button>
-          </div>
           <label class="sb-student">
             <span class="switch sm"><input type="checkbox" id="sbStudent"><span class="track"></span></span>
             <span data-i18n="student">Student half fare</span>
           </label>
         </div>
       </div>
-      <section id="resultsSection">
-      <div id="resultsMeta"></div>
-      <div id="resultsList"></div>
-    </section>
-
-    <!-- map -->
-    <div id="mapPanel">
-      <div class="card">
-        <div class="map-head"><b id="mapTitle">Route map</b><button id="mapClose" type="button" aria-label="Close map">✕</button></div>
-        <div class="map-wrap"><div id="map"></div><button id="mapRecenter" class="recenter-btn" type="button" aria-label="Back to my location"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button></div>
-        <button id="gmapsBtn" type="button" data-i18n="gmapsBtn">🌐 Open in Google Maps (live traffic)</button>
-      </div>
-    </div>
-
     <div id="livePanel">
       <div class="card">
         <div class="map-head"><b id="liveTitle">Live trip</b><button id="liveClose" type="button">✕</button></div>
@@ -602,6 +580,24 @@ footer b{color:var(--text)}
         <p id="liveHint" class="live-hint"></p>
       </div>
     </div>
+
+    <div id="mapPanel">
+      <div class="card">
+        <div class="map-head"><b id="mapTitle">Route map</b><button id="mapClose" type="button" aria-label="Close map">✕</button></div>
+        <div class="map-wrap"><div id="map"></div><button id="mapRecenter" class="recenter-btn" type="button" aria-label="Back to my location"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button></div>
+        <button id="gmapsBtn" type="button" data-i18n="gmapsBtn">🌐 Open in Google Maps (live traffic)</button>
+      </div>
+    </div>
+
+      <section id="resultsSection">
+      <div id="resultsMeta"></div>
+      <div id="resultsList"></div>
+    </section>
+
+    <!-- map -->
+
+
+
 
 
   </div>
@@ -986,8 +982,7 @@ const store = {
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let lang = store.get('lang', 'en');
-let peak = store.get('peak', null);
-if (peak === null) { const h = new Date().getHours(); peak = (h >= 7 && h < 11) || (h >= 16 && h < 21); }
+const peak = (() => { const h = new Date().getHours(); return (h >= 7 && h < 11) || (h >= 16 && h < 21); })();
 let student = !!store.get('student', false);
 let acFilter = store.get('acFilter', 'all');
 let dirAc = 'all';
@@ -1162,23 +1157,17 @@ window.addEventListener('resize', placeSwap);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => placeSwap());
 function syncToggles() {
   $('studentToggle').checked = student;
-  $('segPeak').classList.toggle('active', peak);
-  $('segOff').classList.toggle('active', !peak);
   $('segAcAll').classList.toggle('active', acFilter === 'all');
   $('segAcAC').classList.toggle('active', acFilter === 'ac');
   $('segAcNon').classList.toggle('active', acFilter === 'nonac');
   if ($('sbStudent')) {
     $('sbStudent').checked = student;
-    $('sbPeak').classList.toggle('active', peak);
-    $('sbOff').classList.toggle('active', !peak);
     $('sbAcAll').classList.toggle('active', acFilter === 'all');
     $('sbAcAC').classList.toggle('active', acFilter === 'ac');
     $('sbAcNon').classList.toggle('active', acFilter === 'nonac');
   }
 }
 $('studentToggle').addEventListener('change', e => { student = e.target.checked; store.set('student', student); if (lastFrom) renderLast(false); });
-$('segPeak').addEventListener('click', () => { peak = true; store.set('peak', true); syncToggles(); if (lastFrom) renderLast(false); });
-$('segOff').addEventListener('click', () => { peak = false; store.set('peak', false); syncToggles(); if (lastFrom) renderLast(false); });
 function setAcFilter(v) { acFilter = v; store.set('acFilter', v); syncToggles(); if (lastFrom) renderLast(false); }
 $('segAcAll').addEventListener('click', () => setAcFilter('all'));
 $('segAcAC').addEventListener('click', () => setAcFilter('ac'));
@@ -1186,8 +1175,6 @@ $('segAcNon').addEventListener('click', () => setAcFilter('nonac'));
 $('sbAcAll').addEventListener('click', () => setAcFilter('all'));
 $('sbAcAC').addEventListener('click', () => setAcFilter('ac'));
 $('sbAcNon').addEventListener('click', () => setAcFilter('nonac'));
-$('sbPeak').addEventListener('click', () => { peak = true; store.set('peak', true); syncToggles(); if (lastFrom) renderLast(false); });
-$('sbOff').addEventListener('click', () => { peak = false; store.set('peak', false); syncToggles(); if (lastFrom) renderLast(false); });
 $('sbStudent').addEventListener('change', e => { student = e.target.checked; store.set('student', student); syncToggles(); if (lastFrom) renderLast(false); });
 $('sbEdit').addEventListener('click', () => {
   document.querySelector('.search-card').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
@@ -1395,7 +1382,7 @@ function showMap(jn) {
   const panel = $('mapPanel');
   panel.classList.add('show');
   $('mapTitle').textContent = s.routeMap + ': ' + stopName(lastFrom) + ' → ' + stopName(lastTo);
-  setTimeout(() => panel.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }), 40);
+  setTimeout(() => panel.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' }), 40);
   if (typeof L === 'undefined') {
     $('map').innerHTML = '<div class="map-fallback">' + esc(s.mapFail) + '</div>';
     return;
@@ -1843,7 +1830,7 @@ $('langBtn').addEventListener('click', () => {
 if ('IntersectionObserver' in window) {
   const io = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); }
-  }), { threshold: .07 });
+  }), { threshold: 0, rootMargin: '0px 0px 60px 0px' });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 } else {
   document.querySelectorAll('.reveal').forEach(el => el.classList.add('vis'));
@@ -1907,6 +1894,7 @@ function switchView(v) {
   curView = v;
   document.body.dataset.view = v;
   for (const name in VIEW_ELS) VIEW_ELS[name].forEach(el => { if (el) el.style.display = name === v ? '' : 'none'; });
+  VIEW_ELS[v].forEach(el => { if (el && el.classList && el.classList.contains('reveal')) el.classList.add('vis'); });
   document.querySelectorAll('#tabbar button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   window.scrollTo({ top: 0, behavior: 'auto' });
   requestAnimationFrame(updateBarVis);
