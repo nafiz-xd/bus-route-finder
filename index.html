@@ -432,6 +432,16 @@ footer b{color:var(--text)}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 </style>
+
+/* owner-only usage stats (invisible to normal users) */
+#ownerStatsBtn{position:fixed;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:970;width:46px;height:46px;border:none;border-radius:50%;background:var(--green);color:#fff;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);cursor:pointer;opacity:.92}
+#ownerStatsBtn:active{transform:scale(.93)}
+#ownerStatsPanel{position:fixed;right:12px;bottom:calc(144px + env(safe-area-inset-bottom));z-index:971;width:min(272px,86vw);background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;font-size:14px}
+#ownerStatsBtn[hidden],#ownerStatsPanel[hidden]{display:none!important}
+#ownerStatsPanel .osp-head{display:flex;align-items:center;justify-content:space-between;font-weight:700;margin-bottom:8px}
+#ownerStatsPanel .osp-close{border:none;background:transparent;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 4px}
+#ownerStatsPanel .osp-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-top:1px solid var(--border)}
+#ownerStatsPanel .osp-row b{font-variant-numeric:tabular-nums}
 </head>
 <body>
 
@@ -699,6 +709,16 @@ footer b{color:var(--text)}
 
 
 <div id="toast" role="status"></div>
+<button id="ownerStatsBtn" type="button" aria-label="Usage stats" hidden>📊</button>
+<div id="ownerStatsPanel" hidden>
+  <div class="osp-head"><span id="ospTitle">Usage stats</span><button class="osp-close" id="ospClose" type="button" aria-label="Close">✕</button></div>
+  <div class="osp-row"><span id="ospOnlineL">🟢 Online now</span><b id="ospOnline">–</b></div>
+  <div class="osp-row"><span id="ospTodayL">Today's visits</span><b id="ospToday">–</b></div>
+  <div class="osp-row"><span id="ospTodayUsersL">Users today</span><b id="ospTodayUsers">–</b></div>
+  <div class="osp-row"><span id="ospTotalUsersL">Total users</span><b id="ospTotalUsers">–</b></div>
+  <div class="osp-row"><span id="ospTotalL">Total visits</span><b id="ospTotal">–</b></div>
+</div>
+
 
 <script src="routes.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1907,6 +1927,126 @@ renderReports();
 if (lang === 'bn') applyLang(true);
 requestAnimationFrame(placeSwap);
 setTimeout(placeSwap, 350);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Owner-only usage stats + live presence (brf-v28). Fails silently: the app works exactly as before if the backend is unreachable. */
+(function () {
+  'use strict';
+  var SB_URL = 'https://vfttgvxkebrncjmvmvco.supabase.co';
+  var SB_KEY = 'sb_publishable_lREfzRV8ELuxEdtWD3Xwyg_pi369740';
+  var sb = null, onlineCount = null, statsData = null, refreshTimer = null;
+  var L = {
+    en: { title: 'Usage stats', online: '\uD83D\uDFE2 Online now', today: 'Today\u2019s visits', todayUsers: 'Users today', totalUsers: 'Total users', total: 'Total visits' },
+    bn: { title: '\u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u09C7\u09B0 \u09B9\u09BF\u09B8\u09BE\u09AC', online: '\uD83D\uDFE2 \u098F\u0996\u09A8 online', today: '\u0986\u099C\u0995\u09C7\u09B0 \u09AD\u09BF\u099C\u09BF\u099F', todayUsers: '\u0986\u099C\u0995\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u0995\u09BE\u09B0\u09C0', totalUsers: '\u09AE\u09CB\u099F \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u0995\u09BE\u09B0\u09C0', total: '\u09AE\u09CB\u099F \u09AD\u09BF\u099C\u09BF\u099F' }
+  };
+  function curLang() { try { return (typeof lang !== 'undefined' && lang === 'bn') ? 'bn' : 'en'; } catch (e) { return 'en'; } }
+  function fmt(n) { try { return (typeof fmtN === 'function') ? fmtN(n) : String(n); } catch (e) { return String(n); } }
+  function setText(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
+  function pick(d, keys) { for (var i = 0; i < keys.length; i++) { if (d && d[keys[i]] !== undefined && d[keys[i]] !== null) return d[keys[i]]; } return null; }
+  function renderStats() {
+    var t = L[curLang()];
+    setText('ospTitle', t.title); setText('ospOnlineL', t.online); setText('ospTodayL', t.today);
+    setText('ospTodayUsersL', t.todayUsers); setText('ospTotalUsersL', t.totalUsers); setText('ospTotalL', t.total);
+    setText('ospOnline', onlineCount === null ? '\u2013' : fmt(Math.max(0, onlineCount - 1)));
+    if (statsData) {
+      var tv = pick(statsData, ['today_visits', 'visits_today']);
+      var tu = pick(statsData, ['today_users', 'users_today']);
+      var au = pick(statsData, ['total_users', 'users_total']);
+      var av = pick(statsData, ['total_visits', 'visits_total']);
+      if (tv !== null) setText('ospToday', fmt(tv));
+      if (tu !== null) setText('ospTodayUsers', fmt(tu));
+      if (au !== null) setText('ospTotalUsers', fmt(au));
+      if (av !== null) setText('ospTotal', fmt(av));
+    }
+  }
+  function fetchStats() {
+    if (!sb) return;
+    try {
+      sb.rpc('bus_stats').then(function (res) {
+        try { if (res && !res.error && res.data) { statsData = Array.isArray(res.data) ? res.data[0] : res.data; renderStats(); } } catch (e) {}
+      }, function () {});
+    } catch (e) {}
+  }
+  /* owner unlock via one-time URL param */
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('owner') === 'brf-owner-2026') {
+      try { localStorage.setItem('brf_owner', '1'); } catch (e) {}
+      q.delete('owner');
+      var rest = q.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+    }
+  } catch (e) {}
+  var isOwner = false;
+  try { isOwner = localStorage.getItem('brf_owner') === '1'; } catch (e) {}
+  /* device id */
+  var deviceId = null;
+  try {
+    deviceId = localStorage.getItem('brf_device_id');
+    if (!deviceId) {
+      deviceId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('brf_device_id', deviceId);
+    }
+  } catch (e) {}
+  if (!deviceId) return;
+  var platform = 'desktop';
+  try {
+    var ua = navigator.userAgent || '';
+    if (/iphone|ipad|ipod/i.test(ua)) platform = 'iphone'; else if (/android/i.test(ua)) platform = 'android';
+  } catch (e) {}
+  /* owner UI (only ever visible on the owner's device) */
+  if (isOwner) {
+    var btn = document.getElementById('ownerStatsBtn');
+    var panel = document.getElementById('ownerStatsPanel');
+    var closeBtn = document.getElementById('ospClose');
+    if (btn && panel) {
+      btn.hidden = false;
+      renderStats();
+      btn.addEventListener('click', function () {
+        var willOpen = panel.hidden;
+        panel.hidden = !willOpen;
+        if (willOpen) {
+          renderStats(); fetchStats();
+          if (refreshTimer) clearInterval(refreshTimer);
+          refreshTimer = setInterval(function () { fetchStats(); renderStats(); }, 30000);
+        } else if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+      });
+      if (closeBtn) closeBtn.addEventListener('click', function () {
+        panel.hidden = true;
+        if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+      });
+    }
+  }
+  /* backend: visit log + live presence (all silent on failure) */
+  try {
+    if (!window.supabase || !window.supabase.createClient) return;
+    sb = window.supabase.createClient(SB_URL, SB_KEY);
+  } catch (e) { return; }
+  try {
+    var logged = false;
+    try { logged = !!sessionStorage.getItem('brf_visit_logged'); } catch (e) {}
+    if (!logged) {
+      try { sessionStorage.setItem('brf_visit_logged', '1'); } catch (e) {}
+      sb.from('bus_visits').insert({ device_id: deviceId, platform: platform }).then(function () {}, function () {});
+    }
+  } catch (e) {}
+  var channel = null;
+  try {
+    channel = sb.channel('brf-live', { config: { presence: { key: deviceId } } });
+    channel.on('presence', { event: 'sync' }, function () {
+      try { onlineCount = Object.keys(channel.presenceState()).length; renderStats(); } catch (e) {}
+    });
+    channel.subscribe(function (status) {
+      if (status === 'SUBSCRIBED') {
+        try { var p = channel.track({ at: Date.now() }); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+      }
+    });
+    window.addEventListener('pagehide', function () { try { channel.untrack(); } catch (e) {} });
+  } catch (e) {}
+  if (isOwner) fetchStats();
+})();
 </script>
 </body>
 </html>
