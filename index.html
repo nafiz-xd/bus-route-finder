@@ -1039,19 +1039,20 @@ function attachSugg(input, box, onPick) {
   }
   function render() {
     if (suppress) { suppress = false; return; }
-    const q = input.value.trim().toLowerCase();
+    const q = input.value.trim();
+    if (!q) { close(); return; }
     const pool = ALL_STOPS.map(en => ({ en, disp: stopName(en), alt: lang === 'bn' ? en : (STOP_BN[en] || en) }));
-    let m;
-    if (!q) m = pool.slice().sort((a, b) => a.disp.localeCompare(b.disp)).slice(0, 12);
-    else {
-      const starts = [], cont = [];
-      for (const it of pool) {
-        const a = it.en.toLowerCase(), b = (STOP_BN[it.en] || '').toLowerCase(), d = it.disp.toLowerCase();
-        if (a.startsWith(q) || b.startsWith(q) || d.startsWith(q)) starts.push(it);
-        else if (a.includes(q) || b.includes(q) || d.includes(q)) cont.push(it);
-      }
-      m = starts.concat(cont).slice(0, 8);
+    const norm = s => s.toLowerCase().replace(/[\s\-]/g, '').replace(/([bcdfgjklmnpqrstvwz])h/g, '$1');
+    const subseq = (n, x) => { let i = 0; for (const ch of x) { if (ch === n[i]) i++; if (i === n.length) return true; } return i === n.length; };
+    const qn = norm(q);
+    const starts = [], cont = [], fuzzy = [];
+    for (const it of pool) {
+      const names = [it.en, STOP_BN[it.en] || '', it.disp].map(norm);
+      if (names.some(n => n.startsWith(qn))) starts.push(it);
+      else if (names.some(n => n.includes(qn))) cont.push(it);
+      else if (names.some(n => subseq(qn, n))) fuzzy.push(it);
     }
+    const m = starts.concat(cont, fuzzy).slice(0, 8);
     if (!m.length) { close(); return; }
     items = m; active = -1;
     box.innerHTML = m.map(it => '<button type="button" class="sugg-item" data-en="' + esc(it.en) + '"><span>' + esc(it.disp) + '</span><small>' + esc(it.alt) + '</small></button>').join('');
