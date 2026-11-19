@@ -2044,6 +2044,7 @@ setTimeout(placeSwap, 350);
   try {
     var logged = false;
     try { logged = !!sessionStorage.getItem('brf_visit_logged'); } catch (e) {}
+    if (isOwner) logged = true; /* the owner's own visits are never counted */
     if (!logged) {
       try { sessionStorage.setItem('brf_visit_logged', '1'); } catch (e) {}
       sb.from('bus_visits').insert({ device_id: deviceId, platform: platform }).then(function () {}, function () {});
