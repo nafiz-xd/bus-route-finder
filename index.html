@@ -104,8 +104,8 @@ main{max-width:1060px;margin:0 auto;padding:0 16px 30px}
 .sugg-item small{color:var(--muted);font-weight:500;font-size:12px;white-space:nowrap}
 .sugg-item:hover,.sugg-item.active{background:var(--green-light)}
 #nearBtn.busy svg{animation:nearPulse 1s ease-in-out infinite}
-#nearBtn.hint::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--green);animation:nearHint 1.8s ease-out infinite;pointer-events:none}
-@keyframes nearHint{0%{transform:scale(.75);opacity:.9}70%{transform:scale(1.45);opacity:0}100%{transform:scale(1.45);opacity:0}}
+#nearBtn.hint::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--green);animation:nearHint 2.2s cubic-bezier(.22,.61,.36,1) infinite;pointer-events:none;will-change:transform,opacity}
+@keyframes nearHint{0%{transform:scale(.8);opacity:.85}100%{transform:scale(1.22);opacity:0}}
 @keyframes nearPulse{0%,100%{opacity:1}50%{opacity:.3}}
 .hero-banner{border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 10px 26px rgba(0,0,0,.22);line-height:0}
 .hero-banner img{width:100%;height:clamp(120px,26vw,168px);object-fit:cover;animation:kenburns 16s ease-in-out infinite alternate}
