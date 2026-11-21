@@ -283,7 +283,7 @@ section.block{margin-top:30px}
 .dir-stop.sel-alight .ld{background:var(--amber);border-color:var(--amber);box-shadow:0 0 7px rgba(245,166,35,.55)}
 .dir-stop .lname{font-weight:600;font-size:14.5px}
 .dir-stop .dtag{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;display:none}
-.dir-stop.sel-board .dtag{display:inline-block;background:#e6f4ec;color:var(--green-d)}
+.dir-stop.sel-board .dtag{display:inline-block;background:#e6f4ec;color:var(--green-dark)}
 .dir-stop.sel-alight .dtag{display:inline-block;background:#fdeeda;color:#9a6206}
 [data-theme="dark"] .dir-stop.sel-board .dtag{background:#123324;color:#8fe3ae}
 [data-theme="dark"] .dir-stop.sel-alight .dtag{background:#3a2c10;color:#ffd98a}
@@ -433,7 +433,7 @@ footer b{color:var(--text)}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
-/* ---------- v40: get-off alert / saved places / voice / popular / per-bus report ---------- */
+/* ---------- v40: get-off alert / saved places / voice / per-bus report ---------- */
 #liveAlert{background:#fdeeda;color:#9a6206;border:1.5px solid var(--amber);border-radius:12px;padding:11px 14px;font-weight:800;font-size:15px;margin-bottom:10px;animation:nearPulse 1.2s ease-in-out infinite}
 [data-theme="dark"] #liveAlert{background:#3a2c10;color:#ffd98a}
 #liveAlert[hidden]{display:none}
@@ -458,14 +458,6 @@ footer b{color:var(--text)}
 .mic-btn.from-mic{right:47px}
 .mic-btn.listening{background:var(--danger);color:#fff;animation:nearPulse 1s ease-in-out infinite}
 .field input.mic-pad{padding-right:92px}
-#popularSection{scroll-margin-top:76px}
-.pop-list{overflow:hidden;padding:0}
-.pop-row{display:flex;align-items:center;gap:9px;width:100%;padding:14px 16px;border:none;background:none;border-bottom:1px dashed var(--border);color:var(--text);font:inherit;font-weight:700;font-size:15px;text-align:left;cursor:pointer;transition:background .2s}
-.pop-row:last-child{border-bottom:none}
-.pop-row:hover{background:var(--surface2)}
-.pop-row:active{background:var(--green-light)}
-.pop-row .arr{color:var(--amber);font-weight:800;flex:none}
-.pop-row .chev{margin-left:auto;color:var(--muted);flex:none}
 .dir-report{margin-top:8px;width:100%;background:none;border:1.5px dashed var(--border);color:var(--muted);border-radius:12px;padding:9px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;transition:.2s}
 .dir-report:hover{color:var(--danger);border-color:var(--danger)}
 .leg-report{padding:5px 0 1px 2px}
@@ -609,12 +601,6 @@ footer b{color:var(--text)}
         <div class="chips" id="chipsRecent"></div>
       </div>
     </div>
-
-    <!-- popular routes (v40) -->
-    <section id="popularSection">
-      <div class="sec-head"><h3>🔥 <span data-i18n="popular">Popular routes</span></h3></div>
-      <div class="card pop-list" id="popList"></div>
-    </section>
 
     <!-- search empty state (illustrated, hides after first search) -->
     <div id="searchEmpty" class="card">
@@ -810,7 +796,7 @@ const STRINGS = {
     statBuses: 'Bus services', statStops: 'Stops covered', statMetro: 'Metro stations',
     fromLabel: 'From', toLabel: 'To', fromPh: 'From — where are you starting?', toPh: 'To — where do you want to go?',
     nearMe: 'Near me', locating: 'Locating…', student: 'Student half fare', peak: 'Peak', offpeak: 'Off-peak',
-    search: 'Search routes', popular: 'Popular routes', favorites: 'Favorites', recent: 'Recent searches',
+    search: 'Search routes', favorites: 'Favorites', recent: 'Recent searches',
     navBuses: 'All Buses', navStop: 'Stop Board', navMetro: 'Metro Rail', navReport: 'Report & Suggest',
     allBuses: 'All Bus Services', allBusesSub: 'Tap a bus to see its full route', busFilterPh: 'Filter buses by name…',
     stopBoard: 'Stop Board', stopBoardSub: 'Every bus passing a stop', pickStop: 'Pick a stop',
@@ -840,7 +826,7 @@ const STRINGS = {
     totalFare: 'Total fare', mapTitle: 'Route map', routeMap: 'Route map',
     resultsWord: 'route options', noRoute: 'No route found between these two stops yet. Try a nearby stop, or report the missing connection below.',
     errEmpty: 'Please enter both a From and a To stop.', errSame: 'From and To are the same place — pick two different stops.',
-    firstBus: 'First', lastBus: 'Last', every: 'Every', busesVia: 'buses pass this stop', noBusVia: 'No bus found for this stop yet.',
+    firstBus: 'First', lastBus: 'Last', every: 'Every', busesVia: 'buses pass this stop', noBusVia: 'No bus found for this stop yet.', noBusMatch: 'No bus matches your filter.',
     reportThanks: 'Thanks! Your report was sent to the app team.', reportEmpty: 'Please write a few details first.',
     copied: 'Copied to clipboard', sharedOk: 'Shared — thank you!', nearestSet: 'Nearest stop set: ',
     geoErr: 'Could not get a GPS fix. Please try again, or type your stop name instead.', geoNA: 'Location is not available on this device.',
@@ -862,7 +848,7 @@ const STRINGS = {
     statBuses: 'বাস সার্ভিস', statStops: 'মোট স্টপ', statMetro: 'মেট্রো স্টেশন',
     fromLabel: 'যাত্রা শুরু', toLabel: 'গন্তব্য', fromPh: 'কোথা থেকে যাত্রা শুরু?', toPh: 'কোথায় যেতে চান?',
     nearMe: 'আমার কাছে', locating: 'খোঁজা হচ্ছে…', student: 'ছাত্র অর্ধেক ভাড়া', peak: 'ভিড়ের সময়', offpeak: 'স্বাভাবিক সময়',
-    search: 'রুট খুঁজুন', popular: 'জনপ্রিয় রুট', favorites: 'পছন্দের রুট', recent: 'সাম্প্রতিক অনুসন্ধান',
+    search: 'রুট খুঁজুন', favorites: 'পছন্দের রুট', recent: 'সাম্প্রতিক অনুসন্ধান',
     navBuses: 'সব বাস', navStop: 'স্টপ বোর্ড', navMetro: 'মেট্রো রেল', navReport: 'রিপোর্ট ও পরামর্শ',
     allBuses: 'সব বাস সার্ভিস', allBusesSub: 'পুরো রুট দেখতে বাসে ট্যাপ করুন', busFilterPh: 'বাসের নাম দিয়ে খুঁজুন…',
     stopBoard: 'স্টপ বোর্ড', stopBoardSub: 'একটি স্টপ দিয়ে যাওয়া সব বাস', pickStop: 'একটি স্টপ বাছুন',
@@ -892,7 +878,7 @@ const STRINGS = {
     totalFare: 'মোট ভাড়া', mapTitle: 'রুটের ম্যাপ', routeMap: 'রুটের ম্যাপ',
     resultsWord: 'রুট অপশন', noRoute: 'এই দুই স্টপের মধ্যে এখনো কোনো রুট পাওয়া যায়নি। কাছের অন্য স্টপ চেষ্টা করুন, অথবা নিচে রিপোর্ট করে জানান।',
     errEmpty: 'যাত্রা শুরু আর গন্তব্য — দুটো জায়গাই লিখুন।', errSame: 'যাত্রা শুরু আর গন্তব্য একই জায়গা — দুটি আলাদা স্টপ বাছুন।',
-    firstBus: 'প্রথম', lastBus: 'শেষ', every: 'প্রতি', busesVia: 'টি বাস এই স্টপ দিয়ে যায়', noBusVia: 'এই স্টপের জন্য এখনো কোনো বাস পাওয়া যায়নি।',
+    firstBus: 'প্রথম', lastBus: 'শেষ', every: 'প্রতি', busesVia: 'টি বাস এই স্টপ দিয়ে যায়', noBusVia: 'এই স্টপের জন্য এখনো কোনো বাস পাওয়া যায়নি।', noBusMatch: 'আপনার ফিল্টারের সাথে কোনো বাস মিলছে না।',
     reportThanks: 'ধন্যবাদ! আপনার রিপোর্ট অ্যাপ টিমের কাছে পাঠানো হয়েছে।', reportEmpty: 'আগে কিছু বিস্তারিত লিখুন।',
     copied: 'ক্লিপবোর্ডে কপি হয়েছে', sharedOk: 'শেয়ার হয়েছে — ধন্যবাদ!', nearestSet: 'সবচেয়ে কাছের স্টপ সেট হয়েছে: ',
     geoErr: 'GPS লোকেশন পাওয়া যাচ্ছে না। আবার চেষ্টা করুন, অথবা স্টপের নাম লিখে দিন।', geoNA: 'এই ডিভাইসে লোকেশন পাওয়া যাচ্ছে না।',
@@ -1056,6 +1042,9 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('brf_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('brf_' + k, JSON.stringify(v)); } catch (e) {} }
 };
+/* array-valued store keys, hardened against corrupt/wrong-shaped saved data */
+function getArr(k) { const v = store.get(k, []); return Array.isArray(v) ? v : []; }
+function validPair(p) { return Array.isArray(p) && p.length === 2 && ALL_STOPS.includes(p[0]) && ALL_STOPS.includes(p[1]); }
 const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let lang = store.get('lang', 'en');
@@ -1184,16 +1173,15 @@ attachSugg($('stopInput'), $('stopSugg'));
 })();
 
 /* ---------- quick chips ---------- */
-const POPULAR = [['Mirpur 10', 'Motijheel'], ['Uttara', 'Gulistan'], ['Farmgate', 'Motijheel'], ['Gazipur', 'Gulistan'], ['Savar', 'Motijheel'], ['Gabtoli', 'Motijheel']];
 function chipHTML(pair, cls) {
   return '<button type="button" class="chip ' + (cls || '') + '" data-from="' + esc(pair[0]) + '" data-to="' + esc(pair[1]) + '">' +
     esc(stopName(pair[0])) + ' <span class="arr">→</span> ' + esc(stopName(pair[1])) + '</button>';
 }
 function renderChips() {
-  const favs = store.get('favs', []);
+  const favs = getArr('favs').filter(validPair);
   $('favGroup').hidden = favs.length === 0;
   $('chipsFavs').innerHTML = favs.map(p => chipHTML(p, 'fav')).join('');
-  const rec = store.get('recent', []);
+  const rec = getArr('recent').filter(validPair);
   $('recentGroup').hidden = rec.length === 0;
   $('chipsRecent').innerHTML = rec.map(p => chipHTML(p)).join('');
   document.querySelectorAll('.chip[data-from]').forEach(ch => ch.addEventListener('click', () => {
@@ -1201,28 +1189,14 @@ function renderChips() {
     $('toInput').value = stopName(ch.dataset.to);
     doSearch();
   }));
-  renderPopular();
-}
-function renderPopular() {
-  const el = $('popList');
-  if (!el) return;
-  el.innerHTML = POPULAR.map(p =>
-    '<button type="button" class="pop-row" data-from="' + esc(p[0]) + '" data-to="' + esc(p[1]) + '">' +
-    '<span>' + esc(stopName(p[0])) + '</span><span class="arr">→</span><span>' + esc(stopName(p[1])) + '</span>' +
-    '<span class="chev">›</span></button>').join('');
-  el.querySelectorAll('.pop-row').forEach(r => r.addEventListener('click', () => {
-    $('fromInput').value = stopName(r.dataset.from);
-    $('toInput').value = stopName(r.dataset.to);
-    doSearch();
-  }));
 }
 function pushRecent(from, to) {
-  let rec = store.get('recent', []).filter(p => !(p[0] === from && p[1] === to));
+  let rec = getArr('recent').filter(validPair).filter(p => !(p[0] === from && p[1] === to));
   rec.unshift([from, to]); store.set('recent', rec.slice(0, 6)); renderChips();
 }
-function isFav(from, to) { return store.get('favs', []).some(p => p[0] === from && p[1] === to); }
+function isFav(from, to) { return getArr('favs').some(p => Array.isArray(p) && p[0] === from && p[1] === to); }
 function toggleFav(from, to) {
-  let favs = store.get('favs', []);
+  let favs = getArr('favs').filter(p => Array.isArray(p));
   if (isFav(from, to)) favs = favs.filter(p => !(p[0] === from && p[1] === to));
   else favs.unshift([from, to]);
   store.set('favs', favs.slice(0, 10)); renderChips();
@@ -1257,7 +1231,7 @@ function syncToggles() {
     $('sbAcNon').classList.toggle('active', acFilter === 'nonac');
   }
 }
-$('studentToggle').addEventListener('change', e => { student = e.target.checked; store.set('student', student); if (lastFrom) renderLast(false); });
+$('studentToggle').addEventListener('change', e => { student = e.target.checked; store.set('student', student); syncToggles(); if (lastFrom) renderLast(false); });
 function setAcFilter(v) { acFilter = v; store.set('acFilter', v); syncToggles(); if (lastFrom) renderLast(false); }
 $('segAcAll').addEventListener('click', () => setAcFilter('all'));
 $('segAcAC').addEventListener('click', () => setAcFilter('ac'));
@@ -1312,17 +1286,17 @@ function hideError() { $('searchError').classList.remove('show'); }
 function doSearch() {
   const s = S();
   hideError();
-  const se = $('searchEmpty'); if (se) se.style.display = 'none';
   const fromRaw = $('fromInput').value, toRaw = $('toInput').value;
   const from = matchStop(fromRaw), to = matchStop(toRaw);
   if (!from || !to) {
     if (!fromRaw.trim() || !toRaw.trim()) { showError(s.errEmpty); return; }
-    const badField = !from ? (lang === 'bn' ? 'From' : 'From') : 'To';
+    const badField = !from ? s.fromLabel : s.toLabel;
     const badVal = !from ? fromRaw : toRaw;
     showError('⚠ ' + badField + ': "' + badVal + '" — ' + (lang === 'bn' ? 'এই জায়গাটি স্টপ লিস্টে নেই। টাইপ করার সময় সাজেশন থেকে বাছুন।' : 'this place is not in the stop list. Please pick from the suggestions while typing.'));
     return;
   }
   if (from === to) { showError(s.errSame); return; }
+  const se = $('searchEmpty'); if (se) se.style.display = 'none';
   const btn = $('searchBtn');
   btn.disabled = true; btn.classList.add('loading');
   $('searchBtnText').textContent = lang === 'bn' ? STRINGS.bn.search + '…' : 'Searching…';
@@ -1339,7 +1313,6 @@ function doSearch() {
     lastAllCount = allJ.length;
     lastJourneys = applyAcFilter(allJ);
     pushRecent(from, to);
-    try { if (window.__brfLogSearch) window.__brfLogSearch(from, to); } catch (e) {}
     renderResults();
   }, REDUCED ? 30 : 450);
 }
@@ -1555,6 +1528,7 @@ function havM(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 function fmtDist(m) { return m < 1000 ? fmtN(Math.round(m)) + ' m' : fmtN((m / 1000).toFixed(1)) + ' km'; }
+function liveSvcLabel(st) { return st.kind === 'metro' ? (lang === 'bn' ? 'মেট্রো রেল' : 'Metro Rail') : st.service; }
 function startLive(jn) {
   stopLive(true);
   switchView('home');
@@ -1562,11 +1536,15 @@ function startLive(jn) {
   const stops = [];
   jn.legs.forEach((leg, li) => {
     leg.stops.forEach((st, si) => {
-      if (stops.length && stops[stops.length - 1].name === st) return;
-      stops.push({ name: st, coord: COORDS[st] || null, service: leg.kind === 'metro' ? (lang === 'bn' ? 'মেট্রো রেল' : 'Metro Rail') : leg.service, transfer: si === 0 && li > 0 });
+      if (stops.length && stops[stops.length - 1].name === st) {
+        /* same-name transfer point shared by both legs: keep one stop row, but flag it as the transfer onto the next leg's service */
+        if (si === 0 && li > 0) { const prev = stops[stops.length - 1]; prev.transfer = true; prev.service = leg.service; prev.kind = leg.kind; }
+        return;
+      }
+      stops.push({ name: st, coord: COORDS[st] || null, service: leg.service, kind: leg.kind, transfer: si === 0 && li > 0 });
     });
   });
-  live = { stops: stops, passed: 0, watchId: null, arrived: false, notedTransfer: -1, lastDist: null, gpsOn: false, alerted: false };
+  live = { stops: stops, passed: 0, watchId: null, arrived: false, notedTransfer: -1, lastDist: null, gpsOn: false, alerted: false, manual: false };
   $('livePanel').classList.add('show');
   $('liveTitle').innerHTML = '<span class="live-dot"></span>' + esc(s.liveBtn) + ': ' + esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo));
   $('liveClose').textContent = '✕ ' + s.liveEnd;
@@ -1576,7 +1554,7 @@ function startLive(jn) {
   initLiveMap();
   if (navigator.geolocation) {
     live.watchId = navigator.geolocation.watchPosition(onLivePos, onLiveErr, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
-  } else { $('liveHint').textContent = s.liveManual; }
+  } else { live.manual = true; $('liveHint').textContent = s.liveManual; }
 }
 function renderLive() {
   if (!live) return;
@@ -1585,7 +1563,7 @@ function renderLive() {
   const fillPct = total > 1 ? (live.passed / (total - 1)) * 100 : 100;
   $('liveStops').innerHTML = '<div class="lt-track"><i style="height:' + fillPct + '%"></i></div>' + live.stops.map((st, i) => {
     const cls = i <= live.passed ? 'done' : (i === live.passed + 1 ? 'next' : '');
-    const tag = st.transfer ? '<span class="ltag">⇄ ' + esc(st.service) + '</span>' : '';
+    const tag = st.transfer ? '<span class="ltag">⇄ ' + esc(liveSvcLabel(st)) + '</span>' : '';
     return '<div class="live-stop ' + cls + '" data-i="' + i + '"><span class="ld">' + (i <= live.passed ? '✓' : '') + '</span><span class="lname">' + esc(stopName(st.name)) + '</span>' + tag + '</div>';
   }).join('');
   $('liveBar').style.width = (total > 1 ? (live.passed / (total - 1)) * 100 : 100) + '%';
@@ -1638,12 +1616,12 @@ function onLivePos(pos) {
   live.lastDist = nx && nx.coord ? havM(u, nx.coord) : null;
   if (best > live.passed && bd < 220) {
     live.passed = best;
-    if (live.stops[best].transfer && live.notedTransfer !== best) { live.notedTransfer = best; toast(S().liveChange + ' ' + live.stops[best].service); }
+    if (live.stops[best].transfer && live.notedTransfer !== best) { live.notedTransfer = best; toast(S().liveChange + ' ' + liveSvcLabel(live.stops[best])); }
     if (best >= live.stops.length - 1 && !live.arrived) { live.arrived = true; toast(S().liveArrived); if (navigator.vibrate) navigator.vibrate(200); }
   }
   renderLive();
 }
-function onLiveErr() { if (live) $('liveHint').textContent = S().liveManual; }
+function onLiveErr() { if (live) { live.manual = true; $('liveHint').textContent = S().liveManual; } }
 function initLiveMap() {
   const el = $('liveMap');
   if (typeof L === 'undefined') { el.innerHTML = '<div class="map-fallback">' + esc(S().mapFail) + '</div>'; return; }
@@ -1701,13 +1679,13 @@ function renderDirectory(filter) {
       '<span class="broute">' + esc(stopName(b.stops[0])) + ' → ' + esc(stopName(b.stops[b.stops.length - 1])) + ' · ' + fmtN(b.stops.length) + ' ' + esc(s.stopsWord) + '</span></span>' +
       '<span class="type-chip">' + esc(typeLabel(b.type)) + '</span><span class="chev">▾</span></button>' +
       '<div class="bus-detail"><div class="bus-detail-in">' +
-      '<div class="info-chips"><span>🕐 ' + esc(s.firstBus) + ': ' + esc(fmtN(b.first || '')) + '</span><span>🕙 ' + esc(s.lastBus) + ': ' + esc(fmtN(b.last || '')) + '</span><span>⏱ ' + esc(s.every) + ' ' + esc(fmtN(b.freq || '')) + '</span></div>' +
+      '<div class="info-chips"><span>🕐 ' + esc(s.firstBus) + ': ' + esc(fmtN(b.first || '')) + '</span><span>🕙 ' + esc(s.lastBus) + ': ' + esc(fmtN(b.last || '')) + '</span>' + (b.freq ? '<span>⏱ ' + esc(s.every) + ' ' + esc(fmtN(b.freq)) + '</span>' : '') + '</div>' +
       '<p class="dir-hint">' + esc(s.tapStopsHint) + '</p>' +
       '<div class="dir-route" data-bus="' + esc(b.name) + '" data-bidx="' + BUSES.indexOf(b) + '"><div class="lt-track"><i></i></div>' + stops + '</div>' +
       '<button type="button" class="dir-start" disabled>▶ ' + esc(s.startTripBtn) + '</button>' +
       '<button type="button" class="dir-report" data-bidx="' + BUSES.indexOf(b) + '">⚠ ' + esc(s.wrongInfo) + '</button>' +
       '</div></div></div>';
-  }).join('') : '<div class="no-result">😕 ' + esc(s.noBusVia) + '</div>';
+  }).join('') : '<div class="no-result">😕 ' + esc(s.noBusMatch) + '</div>';
   $('busList').querySelectorAll('.bus-head').forEach(h => h.addEventListener('click', () => {
     const row = h.parentElement, det = row.querySelector('.bus-detail');
     const open = row.classList.toggle('open');
@@ -1868,7 +1846,7 @@ $('metroTimeline').addEventListener('click', e => {
 /* ---------- report & suggest ---------- */
 function renderReports() {
   const s = S();
-  const reps = store.get('reports', []);
+  const reps = getArr('reports').filter(r => r && typeof r === 'object');
   $('myReports').hidden = reps.length === 0;
   $('reportList').innerHTML = reps.map(r =>
     '<div class="rep-item"><b>' + esc(s.repTypeNames[r.type] || r.type) + '</b> — ' + esc(r.details) +
@@ -1881,7 +1859,7 @@ $('reportForm').addEventListener('submit', e => {
   const details = $('reportDetails').value.trim();
   if (!details) { e.preventDefault(); toast(s.reportEmpty); $('reportDetails').focus(); return; }
   const rep = { type: $('reportType').value, details: details, name: $('reportName').value.trim(), contact: $('reportContact').value.trim(), ts: Date.now() };
-  const reps = store.get('reports', []);
+  const reps = getArr('reports');
   reps.unshift(rep);
   store.set('reports', reps.slice(0, 20));
   renderReports();
@@ -1898,7 +1876,7 @@ $('reportForm').addEventListener('submit', e => {
   msg.classList.add('show');
   window.__repPending = rep;
   clearTimeout(window.__repTimer);
-  window.__repTimer = setTimeout(() => { if (window.__repPending) { window.__repPending = null; showReportDone(false); } }, 14000);
+  window.__repTimer = setTimeout(() => { if (window.__repPending) { window.__repLast = window.__repPending; window.__repPending = null; showReportDone(false); } }, 14000);
 });
 
 function showReportDone(sent) {
@@ -1965,7 +1943,9 @@ function applyLang(skipStats) {
   if (typeof live !== 'undefined' && live) {
     $('liveTitle').innerHTML = '<span class="live-dot"></span>' + esc(s.liveBtn) + ': ' + esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo));
     $('liveClose').textContent = '✕ ' + s.liveEnd;
-    if (live.gpsOn) $('liveHint').textContent = s.liveTracking;
+    $('liveHint').textContent = live.gpsOn ? s.liveTracking : (live.manual ? s.liveManual : s.liveGpsWait);
+    $('liveRecenter').title = s.recenterMe;
+    $('mapRecenter').title = s.recenterMe;
     renderLive();
   }
   requestAnimationFrame(placeSwap);
@@ -2033,7 +2013,7 @@ window.addEventListener('resize', updateBarVis);
 
 /* ---------- tab views ---------- */
 const VIEW_ELS = {
-  home: [document.querySelector('.hero'), document.querySelector('.search-card'), document.querySelector('.chip-groups'), $('popularSection'), $('searchEmpty'), $('resultsSection'), $('mapPanel'), $('livePanel')],
+  home: [document.querySelector('.hero'), document.querySelector('.search-card'), document.querySelector('.chip-groups'), $('searchEmpty'), $('resultsSection'), $('mapPanel'), $('livePanel')],
   buses: [$('busesSection')],
   stops: [$('stopSection')],
   metro: [$('metroSection')],
@@ -2044,6 +2024,10 @@ function switchView(v) {
   curView = v;
   document.body.dataset.view = v;
   for (const name in VIEW_ELS) VIEW_ELS[name].forEach(el => { if (el) el.style.display = name === v ? '' : 'none'; });
+  /* the empty-state card is hidden by a successful search via inline style, which the
+     loop above would wipe — restore it according to whether a search has happened */
+  const seEl = $('searchEmpty');
+  if (seEl) seEl.style.display = (v === 'home' && !lastFrom) ? '' : 'none';
   VIEW_ELS[v].forEach(el => { if (el && el.classList && el.classList.contains('reveal')) el.classList.add('vis'); });
   document.querySelectorAll('#tabbar button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   window.scrollTo({ top: 0, behavior: 'auto' });
@@ -2202,13 +2186,6 @@ handleDeepLink();
   var SB_URL = 'https://vfttgvxkebrncjmvmvco.supabase.co';
   var SB_KEY = 'sb_publishable_lREfzRV8ELuxEdtWD3Xwyg_pi369740';
   var sb = null, onlineCount = null, statsData = null, refreshTimer = null;
-  /* search logging for future popular-route stats (v40): fire-and-forget, silent on any failure (table may not exist yet) */
-  window.__brfLogSearch = function (f, t) {
-    try {
-      if (!sb) return;
-      sb.from('bus_searches').insert({ from_stop: f, to_stop: t }).then(function () {}, function () {});
-    } catch (e) {}
-  };
   var L = {
     en: { title: 'Usage stats', online: '\uD83D\uDFE2 Online now', today: 'Today\u2019s visits', todayUsers: 'Users today', totalUsers: 'Total users', total: 'Total visits' },
     bn: { title: '\u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u09C7\u09B0 \u09B9\u09BF\u09B8\u09BE\u09AC', online: '\uD83D\uDFE2 \u098F\u0996\u09A8 online', today: '\u0986\u099C\u0995\u09C7\u09B0 \u09AD\u09BF\u099C\u09BF\u099F', todayUsers: '\u0986\u099C\u0995\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u0995\u09BE\u09B0\u09C0', totalUsers: '\u09AE\u09CB\u099F \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u0995\u09BE\u09B0\u09C0', total: '\u09AE\u09CB\u099F \u09AD\u09BF\u099C\u09BF\u099F' }
