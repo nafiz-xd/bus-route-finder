@@ -137,7 +137,7 @@ body:not([data-view="home"]) #stickyBar{display:none!important}
 #tabbar button svg{display:block}
 .sb-row1{display:flex;align-items:center;gap:8px}
 #sbRoute{font-weight:800;font-size:15px;flex:1;min-width:0;line-height:1.35}
-#sbEdit{border:1.5px solid var(--border);background:var(--surface2);color:var(--green);border-radius:99px;padding:5px 12px;font-weight:800;font-size:13px;cursor:pointer;flex:none}
+#sbEdit,#sbShare{border:1.5px solid var(--border);background:var(--surface2);color:var(--green);border-radius:99px;padding:5px 12px;font-weight:800;font-size:13px;cursor:pointer;flex:none}
 .sb-row2{display:flex;align-items:center;gap:8px;margin-top:9px;flex-wrap:wrap}
 .seg.sm button{padding:6px 11px;font-size:12.5px}
 .switch.sm{width:40px;height:23px}
@@ -433,6 +433,45 @@ footer b{color:var(--text)}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+/* ---------- v40: get-off alert / saved places / voice / popular / per-bus report ---------- */
+#liveAlert{background:#fdeeda;color:#9a6206;border:1.5px solid var(--amber);border-radius:12px;padding:11px 14px;font-weight:800;font-size:15px;margin-bottom:10px;animation:nearPulse 1.2s ease-in-out infinite}
+[data-theme="dark"] #liveAlert{background:#3a2c10;color:#ffd98a}
+#liveAlert[hidden]{display:none}
+#placesBar{border-bottom:1px dashed var(--border);padding-bottom:13px;margin-bottom:15px}
+.places-title{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.places-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.place-chip{display:inline-flex;align-items:center;border:1.5px solid var(--amber);background:#fff8ea;border-radius:999px;overflow:hidden;box-shadow:var(--shadow-sm)}
+[data-theme="dark"] .place-chip{background:#2c2410}
+.place-main{border:none;background:none;font:inherit;font-weight:700;font-size:13.5px;padding:7px 3px 7px 13px;color:var(--text);cursor:pointer;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place-x{border:none;background:none;color:var(--muted);font-size:11px;padding:7px 10px 7px 3px;cursor:pointer;line-height:1}
+.place-x:hover{color:var(--danger)}
+.place-add{border:1.5px dashed var(--border);background:var(--surface2);color:var(--green);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.2s}
+.place-add:active{transform:scale(.95)}
+.place-form{margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:12px}
+.place-form .field{margin-bottom:10px}
+.place-form-btns{display:flex;gap:8px}
+#placeSaveBtn{flex:1;border:none;border-radius:11px;padding:11px;background:var(--green);color:#fff;font-weight:800;font-size:14.5px;cursor:pointer}
+#placeCancelBtn{flex:1;border:1.5px solid var(--border);border-radius:11px;padding:11px;background:var(--surface);color:var(--text);font-weight:700;font-size:14.5px;cursor:pointer}
+.mic-btn{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border:none;background:transparent;color:var(--muted);border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;transition:background .2s,color .2s;z-index:3}
+.mic-btn:hover{background:var(--green-light);color:var(--green)}
+.mic-btn.to-mic{right:5px}
+.mic-btn.from-mic{right:47px}
+.mic-btn.listening{background:var(--danger);color:#fff;animation:nearPulse 1s ease-in-out infinite}
+.field input.mic-pad{padding-right:92px}
+#popularSection{scroll-margin-top:76px}
+.pop-list{overflow:hidden;padding:0}
+.pop-row{display:flex;align-items:center;gap:9px;width:100%;padding:14px 16px;border:none;background:none;border-bottom:1px dashed var(--border);color:var(--text);font:inherit;font-weight:700;font-size:15px;text-align:left;cursor:pointer;transition:background .2s}
+.pop-row:last-child{border-bottom:none}
+.pop-row:hover{background:var(--surface2)}
+.pop-row:active{background:var(--green-light)}
+.pop-row .arr{color:var(--amber);font-weight:800;flex:none}
+.pop-row .chev{margin-left:auto;color:var(--muted);flex:none}
+.dir-report{margin-top:8px;width:100%;background:none;border:1.5px dashed var(--border);color:var(--muted);border-radius:12px;padding:9px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;transition:.2s}
+.dir-report:hover{color:var(--danger);border-color:var(--danger)}
+.leg-report{padding:5px 0 1px 2px}
+.mini-report{background:none;border:none;color:var(--muted);font-size:12.5px;font-weight:700;cursor:pointer;padding:4px 6px;font-family:inherit}
+.mini-report:hover{color:var(--danger)}
+
 /* owner-only usage stats (invisible to normal users) */
 #ownerStatsBtn{position:fixed;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:970;width:46px;height:46px;border:none;border-radius:50%;background:var(--green);color:#fff;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);cursor:pointer;opacity:.92}
 #ownerStatsBtn:active{transform:scale(.93)}
@@ -488,6 +527,32 @@ footer b{color:var(--text)}
   <div class="wrap-narrow">
     <!-- search card -->
     <div class="search-card">
+      <!-- saved places (v40) -->
+      <div id="placesBar">
+        <span class="places-title" data-i18n="placesTitle">Saved places</span>
+        <div class="places-row" id="placesRow"></div>
+        <div class="place-form" id="placeForm" hidden>
+          <div class="field">
+            <label for="placeLabel" data-i18n="placeLabelPh">Label — e.g. Home, Office</label>
+            <div class="inwrap">
+              <span class="dot-ic"></span>
+              <input id="placeLabel" type="text" autocomplete="off" data-i18n-ph="placeLabelPh" placeholder="Label — e.g. Home, Office">
+            </div>
+          </div>
+          <div class="field">
+            <label for="placeStop" data-i18n="pickStop">Pick a stop</label>
+            <div class="inwrap">
+              <span class="dot-ic to"></span>
+              <input id="placeStop" type="text" autocomplete="off" data-i18n-ph="fromPh" placeholder="From — where are you starting?">
+              <div class="sugg" id="placeStopSugg" hidden></div>
+            </div>
+          </div>
+          <div class="place-form-btns">
+            <button type="button" id="placeSaveBtn" data-i18n="placeSave">Save</button>
+            <button type="button" id="placeCancelBtn" data-i18n="placeCancel">Cancel</button>
+          </div>
+        </div>
+      </div>
       <div class="fields-wrap">
       <div class="field">
         <label for="fromInput" data-i18n="fromLabel">From</label>
@@ -535,10 +600,6 @@ footer b{color:var(--text)}
 
     <!-- quick chips -->
     <div class="chip-groups">
-      <div class="chip-group">
-        <h4 data-i18n="popular">Popular routes</h4>
-        <div class="chips" id="chipsPopular"></div>
-      </div>
       <div class="chip-group" id="favGroup" hidden>
         <h4>★ <span data-i18n="favorites">Favorites</span></h4>
         <div class="chips" id="chipsFavs"></div>
@@ -549,6 +610,12 @@ footer b{color:var(--text)}
       </div>
     </div>
 
+    <!-- popular routes (v40) -->
+    <section id="popularSection">
+      <div class="sec-head"><h3>🔥 <span data-i18n="popular">Popular routes</span></h3></div>
+      <div class="card pop-list" id="popList"></div>
+    </section>
+
     <!-- search empty state (illustrated, hides after first search) -->
     <div id="searchEmpty" class="card">
       <div class="empty-img"><img src="search.jpg" alt=""></div>
@@ -558,7 +625,7 @@ footer b{color:var(--text)}
 
     <!-- results -->
     <div id="stickyBar">
-        <div class="sb-row1"><span id="sbRoute"></span><button id="sbEdit" type="button">✎ <span data-i18n="editBtn">Edit</span></button></div>
+        <div class="sb-row1"><span id="sbRoute"></span><button id="sbShare" type="button"><span data-i18n="shareBtn">↗ Share</span></button><button id="sbEdit" type="button">✎ <span data-i18n="editBtn">Edit</span></button></div>
         <div class="sb-row2">
           <div class="seg sm" role="group" aria-label="Bus type">
             <button type="button" id="sbAcAll" class="active" data-i18n="acAll">All</button>
@@ -575,6 +642,7 @@ footer b{color:var(--text)}
       <div class="card">
         <div class="map-head"><b id="liveTitle">Live trip</b><button id="liveClose" type="button">✕</button></div>
         <div id="liveStatus" class="live-status"></div>
+        <div id="liveAlert" hidden></div>
         <div class="live-progress"><i id="liveBar"></i></div>
         <div class="map-wrap"><div id="liveMap"></div><button id="liveRecenter" class="recenter-btn" type="button" aria-label="Back to my location"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button></div>
         <div id="liveStops"></div>
@@ -781,6 +849,10 @@ const STRINGS = {
     noAcRoute: 'No AC bus runs on this route yet. Switch Bus type to "All" to see every option.', noNonAcRoute: 'Every option on this route uses an AC bus or the Metro. Switch Bus type to "All" to see them.',
     mapFail: 'Map could not be loaded (it needs internet). The journey details above are still complete.',
     studentTag: 'student', youAreHere: 'You are here', shareTextIntro: 'Dhaka Bus Route Finder',
+    getOffNext: 'Get off at the next stop', placesTitle: 'Saved places', savePlace: 'Save place',
+    placeLabelPh: 'Label — e.g. Home, Office', placeSave: 'Save', placeCancel: 'Cancel',
+    placesFull: 'You can save up to 6 places.', placeSaved: 'Place saved: ', placeInvalid: 'Please pick a stop from the suggestions.',
+    voiceSearch: 'Voice search', wrongInfo: 'Wrong info?',
     repTypeNames: { wrong: 'Wrong route info', bus: 'Missing bus', stop: 'Missing stop', other: 'Other' }
   },
   bn: {
@@ -829,6 +901,10 @@ const STRINGS = {
     noAcRoute: 'এই রুটে এখনো কোনো এসি বাস নেই। সব অপশন দেখতে বাসের ধরন "সব" করুন।', noNonAcRoute: 'এই রুটের সব অপশনেই এসি বাস বা মেট্রো লাগছে। দেখতে বাসের ধরন "সব" করুন।',
     mapFail: 'ম্যাপ লোড করা যায়নি (ইন্টারনেট লাগে)। উপরের যাত্রার বিবরণ ঠিকঠাক আছে।',
     studentTag: 'ছাত্র', youAreHere: 'আপনি এখানে', shareTextIntro: 'ঢাকা বাস রুট ফাইন্ডার',
+    getOffNext: 'পরের স্টপেই নামতে হবে', placesTitle: 'সেভ করা জায়গা', savePlace: 'জায়গা সেভ করুন',
+    placeLabelPh: 'নাম — যেমন: বাসা, অফিস', placeSave: 'সেভ', placeCancel: 'বাতিল',
+    placesFull: 'সর্বোচ্চ ৬টি জায়গা সেভ করা যাবে।', placeSaved: 'জায়গা সেভ হয়েছে: ', placeInvalid: 'সাজেশন থেকে একটি স্টপ বাছুন।',
+    voiceSearch: 'ভয়েস সার্চ', wrongInfo: 'তথ্য ভুল?',
     repTypeNames: { wrong: 'ভুল রুট তথ্য', bus: 'বাস নেই', stop: 'স্টপ নেই', other: 'অন্যান্য' }
   }
 };
@@ -1108,13 +1184,12 @@ attachSugg($('stopInput'), $('stopSugg'));
 })();
 
 /* ---------- quick chips ---------- */
-const POPULAR = [['Mirpur 10', 'Motijheel'], ['Uttara', 'Gulistan'], ['Gabtoli', 'Motijheel'], ['Farmgate', 'Uttara'], ['Mirpur 1', 'Jatrabari']];
+const POPULAR = [['Mirpur 10', 'Motijheel'], ['Uttara', 'Gulistan'], ['Farmgate', 'Motijheel'], ['Gazipur', 'Gulistan'], ['Savar', 'Motijheel'], ['Gabtoli', 'Motijheel']];
 function chipHTML(pair, cls) {
   return '<button type="button" class="chip ' + (cls || '') + '" data-from="' + esc(pair[0]) + '" data-to="' + esc(pair[1]) + '">' +
     esc(stopName(pair[0])) + ' <span class="arr">→</span> ' + esc(stopName(pair[1])) + '</button>';
 }
 function renderChips() {
-  $('chipsPopular').innerHTML = POPULAR.map(p => chipHTML(p)).join('');
   const favs = store.get('favs', []);
   $('favGroup').hidden = favs.length === 0;
   $('chipsFavs').innerHTML = favs.map(p => chipHTML(p, 'fav')).join('');
@@ -1124,6 +1199,20 @@ function renderChips() {
   document.querySelectorAll('.chip[data-from]').forEach(ch => ch.addEventListener('click', () => {
     $('fromInput').value = stopName(ch.dataset.from);
     $('toInput').value = stopName(ch.dataset.to);
+    doSearch();
+  }));
+  renderPopular();
+}
+function renderPopular() {
+  const el = $('popList');
+  if (!el) return;
+  el.innerHTML = POPULAR.map(p =>
+    '<button type="button" class="pop-row" data-from="' + esc(p[0]) + '" data-to="' + esc(p[1]) + '">' +
+    '<span>' + esc(stopName(p[0])) + '</span><span class="arr">→</span><span>' + esc(stopName(p[1])) + '</span>' +
+    '<span class="chev">›</span></button>').join('');
+  el.querySelectorAll('.pop-row').forEach(r => r.addEventListener('click', () => {
+    $('fromInput').value = stopName(r.dataset.from);
+    $('toInput').value = stopName(r.dataset.to);
     doSearch();
   }));
 }
@@ -1250,6 +1339,7 @@ function doSearch() {
     lastAllCount = allJ.length;
     lastJourneys = applyAcFilter(allJ);
     pushRecent(from, to);
+    try { if (window.__brfLogSearch) window.__brfLogSearch(from, to); } catch (e) {}
     renderResults();
   }, REDUCED ? 30 : 450);
 }
@@ -1298,6 +1388,7 @@ function legHTML(leg) {
     '<div class="leg-stops"><div class="leg-stops-in">' +
     leg.stops.map((st, i) => '<div class="ls-row' + (i === 0 ? ' first' : i === leg.stops.length - 1 ? ' last' : '') + '"><span class="ls-dot"></span><span>' + esc(stopName(st)) + '</span><span class="ls-idx">' + fmtN(i + 1) + '/' + fmtN(leg.stops.length) + '</span></div>').join('') +
     '</div></div>' +
+    (leg.kind === 'bus' ? '<div class="leg-report"><button type="button" class="mini-report" data-rbus="' + esc(leg.service) + '" data-rfrom="' + esc(leg.board) + '" data-rto="' + esc(leg.alight) + '">⚠ ' + esc(s.wrongInfo) + '</button></div>' : '') +
     '</div>';
 }
 function journeyHTML(jn, idx) {
@@ -1428,6 +1519,24 @@ $('gmapsBtn').addEventListener('click', () => {
   window.open(url, '_blank');
 });
 
+/* ---------- per-bus report (v40): open Report view prefilled ---------- */
+function openBusReport(name, from, to) {
+  $('reportType').value = 'wrong';
+  $('reportDetails').value = 'Bus: ' + name + ' — route: ' + stopName(from) + ' → ' + stopName(to) + ' — ';
+  switchView('report');
+  setTimeout(() => { try { $('reportDetails').focus({ preventScroll: true }); } catch (e) { $('reportDetails').focus(); } }, 90);
+}
+$('resultsList').addEventListener('click', e => {
+  const rb = e.target.closest('[data-rbus]');
+  if (rb) openBusReport(rb.dataset.rbus, rb.dataset.rfrom, rb.dataset.rto);
+});
+$('busList').addEventListener('click', e => {
+  const rb = e.target.closest('.dir-report');
+  if (!rb) return;
+  const b = BUSES[+rb.dataset.bidx];
+  if (b) openBusReport(b.name, b.stops[0], b.stops[b.stops.length - 1]);
+});
+
 /* ---------- leg stoppages expansion ---------- */
 $('resultsList').addEventListener('click', e => {
   const mid = e.target.closest('.leg-mid');
@@ -1457,7 +1566,7 @@ function startLive(jn) {
       stops.push({ name: st, coord: COORDS[st] || null, service: leg.kind === 'metro' ? (lang === 'bn' ? 'মেট্রো রেল' : 'Metro Rail') : leg.service, transfer: si === 0 && li > 0 });
     });
   });
-  live = { stops: stops, passed: 0, watchId: null, arrived: false, notedTransfer: -1, lastDist: null, gpsOn: false };
+  live = { stops: stops, passed: 0, watchId: null, arrived: false, notedTransfer: -1, lastDist: null, gpsOn: false, alerted: false };
   $('livePanel').classList.add('show');
   $('liveTitle').innerHTML = '<span class="live-dot"></span>' + esc(s.liveBtn) + ': ' + esc(stopName(lastFrom)) + ' → ' + esc(stopName(lastTo));
   $('liveClose').textContent = '✕ ' + s.liveEnd;
@@ -1486,7 +1595,37 @@ function renderLive() {
     const nx = live.stops[live.passed + 1];
     st.innerHTML = esc(s.liveNext) + ': <b>' + esc(stopName(nx.name)) + '</b><small>' + fmtN(total - 1 - live.passed) + ' ' + esc(s.liveLeft) + (live.lastDist != null ? ' · ' + fmtDist(live.lastDist) + ' ' + esc(s.liveAway) : '') + '</small>';
   }
+  /* get-off alert (v40): destination is the very next stop — fire once per trip */
+  const alertEl = $('liveAlert');
+  const remaining = total - 1 - live.passed;
+  if (!live.arrived && remaining === 1 && total > 1) {
+    alertEl.textContent = '🔔 ' + s.getOffNext + ' — ' + stopName(live.stops[live.passed + 1].name);
+    alertEl.hidden = false;
+    if (!live.alerted) {
+      live.alerted = true;
+      try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+      beep();
+    }
+  } else alertEl.hidden = true;
   drawLiveMap(false);
+}
+function beep() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = beep._ctx || (beep._ctx = new Ctx());
+    if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
+    const t = ctx.currentTime;
+    [0, 0.28].forEach(off => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, t + off);
+      g.gain.exponentialRampToValueAtTime(0.22, t + off + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.2);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t + off); o.stop(t + off + 0.22);
+    });
+  } catch (e) {}
 }
 function onLivePos(pos) {
   if (!live) return;
@@ -1566,6 +1705,7 @@ function renderDirectory(filter) {
       '<p class="dir-hint">' + esc(s.tapStopsHint) + '</p>' +
       '<div class="dir-route" data-bus="' + esc(b.name) + '" data-bidx="' + BUSES.indexOf(b) + '"><div class="lt-track"><i></i></div>' + stops + '</div>' +
       '<button type="button" class="dir-start" disabled>▶ ' + esc(s.startTripBtn) + '</button>' +
+      '<button type="button" class="dir-report" data-bidx="' + BUSES.indexOf(b) + '">⚠ ' + esc(s.wrongInfo) + '</button>' +
       '</div></div></div>';
   }).join('') : '<div class="no-result">😕 ' + esc(s.noBusVia) + '</div>';
   $('busList').querySelectorAll('.bus-head').forEach(h => h.addEventListener('click', () => {
@@ -1814,6 +1954,8 @@ function applyLang(skipStats) {
     $('statMetro').textContent = fmtN((METRO.stations || []).length);
   }
   renderChips();
+  if (typeof renderPlaces === 'function') renderPlaces();
+  document.querySelectorAll('.mic-btn').forEach(b => { b.title = s.voiceSearch; b.setAttribute('aria-label', s.voiceSearch); });
   renderDirectory($('busFilter').value);
   renderMetro();
   renderReports();
@@ -1891,7 +2033,7 @@ window.addEventListener('resize', updateBarVis);
 
 /* ---------- tab views ---------- */
 const VIEW_ELS = {
-  home: [document.querySelector('.hero'), document.querySelector('.search-card'), document.querySelector('.chip-groups'), $('searchEmpty'), $('resultsSection'), $('mapPanel'), $('livePanel')],
+  home: [document.querySelector('.hero'), document.querySelector('.search-card'), document.querySelector('.chip-groups'), $('popularSection'), $('searchEmpty'), $('resultsSection'), $('mapPanel'), $('livePanel')],
   buses: [$('busesSection')],
   stops: [$('stopSection')],
   metro: [$('metroSection')],
@@ -1910,14 +2052,146 @@ function switchView(v) {
 document.querySelectorAll('#tabbar button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
 switchView('home');
 
+/* =====================================================================
+   v40 features: saved places, voice search, trip share links
+   ===================================================================== */
+/* ---------- saved places (localStorage brf_places) ---------- */
+function getPlaces() {
+  const p = store.get('places', []);
+  if (!Array.isArray(p)) return [];
+  return p.filter(x => x && x.stop && ALL_STOPS.includes(x.stop) && typeof x.label === 'string').slice(0, 6);
+}
+function renderPlaces() {
+  const row = $('placesRow');
+  if (!row) return;
+  const places = getPlaces();
+  row.innerHTML = places.map((p, i) =>
+    '<span class="place-chip"><button type="button" class="place-main" data-pi="' + i + '" title="' + esc(stopName(p.stop)) + '">📍 ' + esc(p.label) + '</button>' +
+    '<button type="button" class="place-x" data-px="' + i + '" aria-label="Remove">✕</button></span>').join('') +
+    '<button type="button" class="place-add" id="placeAddBtn">＋ ' + esc(S().savePlace) + '</button>';
+  row.querySelectorAll('.place-main').forEach(b => b.addEventListener('click', () => {
+    const p = getPlaces()[+b.dataset.pi];
+    if (!p) return;
+    const fromM = matchStop($('fromInput').value);
+    if (!$('fromInput').value.trim()) {
+      $('fromInput').value = stopName(p.stop);
+      $('toInput').focus();
+    } else if (fromM !== p.stop) {
+      $('toInput').value = stopName(p.stop);
+      doSearch();
+    } else $('toInput').focus();
+  }));
+  row.querySelectorAll('.place-x').forEach(b => b.addEventListener('click', () => {
+    const places2 = getPlaces();
+    places2.splice(+b.dataset.px, 1);
+    store.set('places', places2);
+    renderPlaces();
+  }));
+  $('placeAddBtn').addEventListener('click', () => {
+    if (getPlaces().length >= 6) { toast(S().placesFull); return; }
+    $('placeStop').value = $('fromInput').value;
+    $('placeLabel').value = '';
+    $('placeForm').hidden = false;
+    $('placeLabel').focus();
+  });
+}
+$('placeSaveBtn').addEventListener('click', () => {
+  const s = S();
+  const stop = matchStop($('placeStop').value);
+  if (!stop) { toast(s.placeInvalid); $('placeStop').focus(); return; }
+  const label = $('placeLabel').value.trim() || stopName(stop);
+  const places = getPlaces().filter(x => x.stop !== stop);
+  places.unshift({ label: label, stop: stop });
+  store.set('places', places.slice(0, 6));
+  renderPlaces();
+  $('placeForm').hidden = true;
+  toast(s.placeSaved + label);
+});
+$('placeCancelBtn').addEventListener('click', () => { $('placeForm').hidden = true; });
+attachSugg($('placeStop'), $('placeStopSugg'));
+
+/* ---------- voice search (Web Speech API; buttons exist only when supported) ---------- */
+const MIC_SVG = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/><path d="M8.5 21h7"/></svg>';
+(function initVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  function addMic(input, box, cls) {
+    const wrap = input.closest('.inwrap');
+    if (!wrap) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mic-btn ' + cls;
+    btn.innerHTML = MIC_SVG;
+    btn.title = S().voiceSearch;
+    btn.setAttribute('aria-label', S().voiceSearch);
+    wrap.appendChild(btn);
+    input._micBtn = btn;
+    btn.addEventListener('click', () => {
+      let rec;
+      try { rec = new SR(); } catch (e) { return; }
+      rec.lang = lang === 'bn' ? 'bn-BD' : 'en-US';
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.onresult = e => {
+        let txt = '';
+        try { txt = (e.results[0][0].transcript || '').trim(); } catch (err) {}
+        if (!txt) return;
+        input.value = txt;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        const first = box.querySelector('.sugg-item');
+        if (first) { first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true })); return; }
+        const m = matchStop(txt);
+        if (m) {
+          input.value = stopName(m);
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+          if (input === $('fromInput') && !$('toInput').value) $('toInput').focus();
+        }
+      };
+      rec.onend = () => btn.classList.remove('listening');
+      rec.onerror = () => btn.classList.remove('listening');
+      try { rec.start(); btn.classList.add('listening'); } catch (e) { btn.classList.remove('listening'); }
+    });
+  }
+  addMic($('fromInput'), $('fromSugg'), 'from-mic');
+  addMic($('toInput'), $('toSugg'), 'to-mic');
+  $('fromInput').classList.add('mic-pad');
+})();
+
+/* ---------- trip share link ---------- */
+$('sbShare').addEventListener('click', () => {
+  if (!lastFrom || !lastTo) return;
+  const s = S();
+  const url = location.origin + location.pathname + '?from=' + encodeURIComponent(lastFrom) + '&to=' + encodeURIComponent(lastTo);
+  if (navigator.share) {
+    navigator.share({ title: s.shareTextIntro, text: s.shareTextIntro + ': ' + stopName(lastFrom) + ' → ' + stopName(lastTo), url: url })
+      .then(() => toast(s.sharedOk)).catch(() => {});
+  } else if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast(s.copied)).catch(() => toast(url));
+  } else toast(url);
+});
+function handleDeepLink() {
+  try {
+    const q = new URLSearchParams(location.search);
+    const f = q.get('from'), t = q.get('to');
+    if (!f || !t) return;
+    const from = matchStop(f), to = matchStop(t);
+    if (!from || !to || from === to) return;
+    $('fromInput').value = stopName(from);
+    $('toInput').value = stopName(to);
+    setTimeout(doSearch, 80);
+  } catch (e) {}
+}
+
 /* ---------- init ---------- */
 renderChips();
+renderPlaces();
 renderDirectory('');
 renderMetro();
 renderReports();
 if (lang === 'bn') applyLang(true);
 requestAnimationFrame(placeSwap);
 setTimeout(placeSwap, 350);
+handleDeepLink();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" integrity="sha384-A97u3Qnt9GZHURO9YJZRe7VQgGUeFzcv6I1oIGnUTxQrCxnpQMwR0/G8F2zt9abZ" crossorigin="anonymous"></script>
@@ -1928,6 +2202,13 @@ setTimeout(placeSwap, 350);
   var SB_URL = 'https://vfttgvxkebrncjmvmvco.supabase.co';
   var SB_KEY = 'sb_publishable_lREfzRV8ELuxEdtWD3Xwyg_pi369740';
   var sb = null, onlineCount = null, statsData = null, refreshTimer = null;
+  /* search logging for future popular-route stats (v40): fire-and-forget, silent on any failure (table may not exist yet) */
+  window.__brfLogSearch = function (f, t) {
+    try {
+      if (!sb) return;
+      sb.from('bus_searches').insert({ from_stop: f, to_stop: t }).then(function () {}, function () {});
+    } catch (e) {}
+  };
   var L = {
     en: { title: 'Usage stats', online: '\uD83D\uDFE2 Online now', today: 'Today\u2019s visits', todayUsers: 'Users today', totalUsers: 'Total users', total: 'Total visits' },
     bn: { title: '\u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u09C7\u09B0 \u09B9\u09BF\u09B8\u09BE\u09AC', online: '\uD83D\uDFE2 \u098F\u0996\u09A8 online', today: '\u0986\u099C\u0995\u09C7\u09B0 \u09AD\u09BF\u099C\u09BF\u099F', todayUsers: '\u0986\u099C\u0995\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u0995\u09BE\u09B0\u09C0', totalUsers: '\u09AE\u09CB\u099F \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u0995\u09BE\u09B0\u09C0', total: '\u09AE\u09CB\u099F \u09AD\u09BF\u099C\u09BF\u099F' }
